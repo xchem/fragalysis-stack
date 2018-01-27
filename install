@@ -2,8 +2,11 @@
 sudo yum install -y wget bzip2 nginx vim git curl libXrender libXext
 curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash 
 sudo yum install -y nodejs
+sudo  rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+sudo yum install -y nginx
 wget https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh
 bash Anaconda3-5.0.1-Linux-x86_64.sh -b -p /home/ec2-user/anaconda3
+export PATH="/home/ec2-user/anaconda3/bin:$PATH"
 # Set up some environment
 sudo mkdir /srv/logs/
 # Set up my user to own this
@@ -11,25 +14,32 @@ sudo chown ec2-user /srv/logs/
 # Open these files
 touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
-# Set up the nginx config
-sudo cp django_nginx.conf /etc/nginx/conf.d/
-sudo semodule -i nginx.pp
 # Set up the conda environment
-conda install -c anaconda postgresql
-conda install -c rdkit rdkit
-conda create -c rdkit -n runserver rdkit postgresql
+conda install -y -c anaconda postgresql
+conda install -y -c rdkit rdkit
+conda create -y -c rdkit -n runserver rdkit postgresql
 source activate runserver
 # Set up the database
-sudo service psql start 
-pg_ctl -D /usr/local/database  -l /srv/logs/postgresql start
+initdb -D ~/database 
+pg_ctl -D ~/database  -l /srv/logs/postgresql start
 createuser --superuser postgres
 # Clone in the django server
-https://github.com/xchem/fragalysis-stack /code
-https://github.com/xchem/fragalysis /usr/local/fragalysis
+cd
+git clone https://github.com/xchem/fragalysis-stack
+sudo mv fragalysis-stack /code
+sudo chown ec2-user /code
+cd /code && git checkout rhel7
+cd 
+git clone https://github.com/xchem/fragalysis
+sudo mv fragalysis /usr/local/fragalysis
+sudo chown ec2-user /usr/local/fragalysis
+# Set up the server
+sudo cp /code/django_nginx.conf /etc/nginx/conf.d/
+sudo cp /code/proxy_params /etc/nginx/
+sudo semodule -i /code/nginx.pp 
 # Install requirements
 cd /usr/local/fragalysis
 pip install -r requirements.txt
 pip install .
 cd /code
 pip install -r requirements.txt
-pip install .
