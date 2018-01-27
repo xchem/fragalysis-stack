@@ -8,7 +8,7 @@ touch /srv/logs/access.log
 tail -n 0 -f /srv/logs/*.log &
 # Start Gunicorn processes
 echo Starting Gunicorn.
-exec gunicorn fragalysis.wsgi:application \
+gunicorn fragalysis.wsgi:application \
     --name fragalysis \
     --bind unix:django_app.sock \
     --workers 3 \
