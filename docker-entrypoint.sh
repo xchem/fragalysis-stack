@@ -14,6 +14,7 @@ touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
 tail -n 0 -f /srv/logs/*.log &
 # Start the NPM build
+echo Starting
 cd /code/frontend && npm run dev &
 # Start Gunicorn processes
 echo Starting Gunicorn.
