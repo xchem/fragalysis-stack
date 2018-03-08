@@ -6,3 +6,4 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
 # Now build the code
 RUN cd /code/frontend && npm install
+ADD docker-entrypoint.sh /code/docker-entrypoint.sh
