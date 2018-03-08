@@ -33,7 +33,6 @@ services:
     image: abradle/fragalysis_stack:stable
     command: /bin/bash /code/docker-entrypoint.sh
     volumes:
-      - .:/code
       - ../logs:/code/logs/
       - ../media:/code/media/
     ports:
