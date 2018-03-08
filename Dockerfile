@@ -9,4 +9,5 @@ RUN cd /code/frontend && npm install
 ADD docker-entrypoint.sh /code/docker-entrypoint.sh
 # Symlink these
 RUN mkdir /code/frontend/bundles/
+RUN mkdir /code/static
 RUN ln -s /code/frontend/bundles/ /code/static/bundles
