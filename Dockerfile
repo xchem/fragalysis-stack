@@ -7,3 +7,5 @@ RUN apt-get install -y nodejs
 # Now build the code
 RUN cd /code/frontend && npm install
 ADD docker-entrypoint.sh /code/docker-entrypoint.sh
+# Symlink these
+RUN ln -s /code/frontend/bundles/ /code/static/bundles
