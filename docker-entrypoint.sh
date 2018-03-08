@@ -1,5 +1,4 @@
 #!/bin/bash
-npm install
 python manage.py makemigrations auth
 python manage.py migrate auth
 python manage.py makemigrations scoring
@@ -13,8 +12,9 @@ python manage.py collectstatic --noinput -v 0 # collect static files
 touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
 tail -n 0 -f /srv/logs/*.log &
-# Start Gunicorn processes
+# Start the NPM build
 npm run dev &
+# Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn fragalysis.wsgi:application \
     --name fragalysis \
