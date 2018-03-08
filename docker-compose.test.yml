@@ -9,7 +9,6 @@ services:
     image: abradle/fragalysis_stack
     command: ["/code/wait-for-it.sh", "db:5432", "--", "/bin/bash", "/code/test_entry.sh"]
     volumes:
-      - .:/code
       - ../logs:/code/logs/
       - ../media:/code/media/
     ports:
