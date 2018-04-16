@@ -1,14 +1,24 @@
 FROM abradle/fragalysis_backend:latest
+
+ENV APP_ROOT /code
+ENV APP_USER_ID 2000
+RUN useradd -c 'Conatiner user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag
+
 # Add in the frontend code
-RUN git clone https://github.com/xchem/fragalysis-frontend /code/frontend
-RUN git remote add ricky https://github.com/ricgillams/fragalysis-frontend
+RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 # Now add npm
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
 # Now build the code
-RUN cd /code/frontend && npm install
-ADD docker-entrypoint.sh /code/docker-entrypoint.sh
+RUN cd ${APP_ROOT}/frontend && npm install
+ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 # Symlink these
-RUN mkdir /code/frontend/bundles/
-RUN mkdir /code/static
-RUN ln -s /code/frontend/bundles/ /code/static/bundles
+RUN mkdir ${APP_ROOT}/frontend/bundles/
+RUN mkdir ${APP_ROOT}/static
+RUN ln -s ${APP_ROOT}/frontend/bundles/ ${APP_ROOT}/static/bundles
+
+RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
+RUN chown -R frag:frag ${APP_ROOT} ${APP_LOGS} /run /etc /var
+
+WORKDIR ${APP_ROOT}
+ENTRYPOINT ["./docker-entrypoint.sh"]
