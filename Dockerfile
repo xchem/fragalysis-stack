@@ -1,4 +1,4 @@
-FROM abradle/fragalysis_backend:latest
+FROM informaticsmatters/fragalysis-backend:1.0.0
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
