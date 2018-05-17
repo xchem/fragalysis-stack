@@ -5,9 +5,9 @@ services:
     image: postgres
     volumes:
        - ../django_data:/var/lib/postgresql/data
-  tests:
-    image: xchem/fragalysis-stack
-    command: ["/code/wait-for-it.sh", "db:5432", "--", "/bin/bash", "/code/test_entry.sh"]
+  web:
+    image: xchem/fragalysis-stack:latest
+    command: /bin/bash /code/launch-stack.sh
     volumes:
       - ../logs:/code/logs/
       - ../media:/code/media/
