@@ -30,8 +30,8 @@ services:
       - NEO4J_AUTH=none
       - NEO4J_dbms_memory_pagecache_size=4G
   web:
-    image: abradle/fragalysis_stack:latest
-    command: /bin/bash /code/docker-entrypoint.sh
+    image: xchem/fragalysis-stack:latest
+    command: /bin/bash /code/launch-stack.sh
     volumes:
       - ../logs:/code/logs/
       - ../media:/code/media/
