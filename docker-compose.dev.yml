@@ -6,6 +6,7 @@ services:
     volumes:
        - ../django_data:/var/lib/postgresql/data
   web:
+    container_name: web_dock
     image: xchem/fragalysis-stack:latest
     command: /bin/bash /code/launch-stack.sh
     volumes:
