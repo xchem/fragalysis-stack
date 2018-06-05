@@ -20,7 +20,7 @@ RUN mkdir ${APP_ROOT}/static
 RUN ln -s ${APP_ROOT}/frontend/bundles/ ${APP_ROOT}/static/bundles
 
 RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
-RUN chown -R 2000 ${APP_ROOT} /run /etc /var
+RUN chown -R 2000 ${APP_ROOT} /run /var
 
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]
