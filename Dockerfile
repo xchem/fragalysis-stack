@@ -21,6 +21,9 @@ RUN mkdir ${APP_ROOT}/static
 RUN ln -s ${APP_ROOT}/frontend/bundles/ ${APP_ROOT}/static/bundles
 
 RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
+RUN chmod 755 ${APP_ROOT}/makemigrations.sh
+RUN chmod 755 ${APP_ROOT}/launch-stack.sh
+
 RUN chown -R 2000 ${APP_ROOT} /run /var
 
 WORKDIR ${APP_ROOT}
