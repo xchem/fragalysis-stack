@@ -1,5 +1,5 @@
-ARG FROM_NAMESPACE=xchem
-FROM ${FROM_NAMESPACE}/fragalysis-backend:latest
+#ARG FROM_NAMESPACE=xchem
+FROM docker-registry.default:5000/fragalysis-cicd/fragalysis-backend:latest
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
