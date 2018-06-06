@@ -10,7 +10,8 @@ pipeline {
     // Registry details
     USER = 'jenkins'
     REGISTRY = 'docker-registry.default:5000'
-    STREAM_IMAGE = "${REGISTRY}/fragalysis-cicd/fragalysis-stack:latest"
+    REGISTRY_PRJ = "${REGISTRY}/fragalysis-cicd"
+    STREAM_IMAGE = "${REGISTRY_PRJ}/fragalysis-stack:latest"
   }
 
   stages {
@@ -24,7 +25,7 @@ pipeline {
     stage('Build Image') {
       steps {
         echo "Building fragalysis-stack..."
-        sh "buildah bud --format docker -f Dockerfile -t ${STREAM_IMAGE}"
+        sh "buildah bud --format docker --build-arg FROM_NAMESPACE=${env.REGISTRY_PROJECT} -f Dockerfile -t ${STREAM_IMAGE}"
       }
     }
 
