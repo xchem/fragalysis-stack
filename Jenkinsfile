@@ -25,7 +25,7 @@ pipeline {
     stage('Build Image') {
       steps {
         echo "Building fragalysis-stack..."
-        sh "buildah bud --format docker --build-arg FROM_NAMESPACE=${env.REGISTRY_PROJECT} -f Dockerfile -t ${STREAM_IMAGE}"
+        sh "buildah bud --format docker --build-arg FROM_NAMESPACE=${env.REGISTRY_PRJ} -f Dockerfile -t ${STREAM_IMAGE}"
       }
     }
 
