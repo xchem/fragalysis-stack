@@ -28,7 +28,7 @@ pipeline {
           TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
         }
         echo "Building fragalysis-stack..."
-        sh "buildah bud --tls-verify=false --creds=${env.REGISTRY_USER}:${TOKEN} --format docker -f Dockerfile-cicd -t ${STREAM_IMAGE}"
+        sh "buildah bud --tls-verify=false --creds=${env.REGISTRY_USER}:${TOKEN} --format docker -f Dockerfile-cicd -t ${STREAM_IMAGE} ."
       }
     }
 
