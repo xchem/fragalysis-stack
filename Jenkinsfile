@@ -27,7 +27,6 @@ pipeline {
       steps {
         slackSend channel: "#${SLACK_BUILD_CHANNEL}",
                   message: "${JOB_NAME} build ${BUILD_NUMBER} - starting..."
-        sh "false"
         script {
           TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
         }
