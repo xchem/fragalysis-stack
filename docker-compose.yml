@@ -1,10 +1,15 @@
 version: '3'
 
 services:
-  db:
-    image: postgres
+  mysql:
+    image: mysql:5.7.23
     volumes:
-       - ../django_data:/var/lib/postgresql/data
+       - ../django_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: django_db
+      MYSQL_PASSWORD: django_password
+      MYSQL_USER: django
   cartridge:
     image: informaticsmatters/rdkit_cartridge:Release_2017_09_1
     user: root
@@ -15,6 +20,7 @@ services:
   graph:
     container_name: neo4j
     image: neo4j
+    command: /bin/bash -c "sleep 1000"
     ports:
 # Comment these two out in produciton
       - "7474:7474"
