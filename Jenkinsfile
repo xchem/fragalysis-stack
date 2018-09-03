@@ -7,37 +7,66 @@ pipeline {
   agent { label 'buildah-slave' }
 
   environment {
-    // Registry details
-    USER = 'jenkins'
+    // Local registry details (for FROM image)
+    REGISTRY_USER = 'jenkins'
     REGISTRY = 'docker-registry.default:5000'
-    REGISTRY_PRJ = "${REGISTRY}/fragalysis-cicd"
-    STREAM_IMAGE = "${REGISTRY_PRJ}/fragalysis-stack:latest"
+    // Destination image (pushed to docker hub)
+    IMAGE = 'xchem/fragalysis-stack:latest'
+    DOCKER_USER = 'alanbchristie'
+    DOCKER_PASSWORD = credentials('abcDockerPassword')
+
+    // Slack channel for all notifications
+    SLACK_BUILD_CHANNEL = 'dls-builds'
+    // Slack channel to be used for errors/failures
+    SLACK_ALERT_CHANNEL = 'dls-alerts'
   }
 
   stages {
 
-    stage('Inspect') {
-      steps {
-          echo "Inspecting..."
-      }
-    }
-
     stage('Build Image') {
       steps {
-        echo "Building fragalysis-stack..."
-        sh "buildah bud --format docker -f Dockerfile-cicd -t ${STREAM_IMAGE}"
+        slackSend channel: "#${SLACK_BUILD_CHANNEL}",
+                  message: "${JOB_NAME} build ${BUILD_NUMBER} - starting..."
+        script {
+          TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
+        }
+        sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker -f Dockerfile-cicd -t ${IMAGE} ."
       }
     }
 
     stage('Push Image') {
       steps {
-        script {
-          TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
-        }
-        sh "podman login --tls-verify=false --username ${env.USER} --password ${TOKEN} ${env.REGISTRY}"
-        sh "buildah push --tls-verify=false ${env.STREAM_IMAGE} docker://${env.STREAM_IMAGE}"
-        sh "podman logout ${env.REGISTRY}"
+        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
+        sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}"
+        sh "podman logout docker.io"
       }
+    }
+
+  }
+
+  // Post-job actions.
+  // See https://jenkins.io/doc/book/pipeline/syntax/#post
+  post {
+
+    success {
+      slackSend channel: "#${SLACK_BUILD_CHANNEL}",
+                color: 'good',
+                message: "${JOB_NAME} build ${BUILD_NUMBER} - complete"
+    }
+
+    failure {
+      slackSend channel: "#${SLACK_BUILD_CHANNEL}",
+                color: 'danger',
+                message: "${JOB_NAME} build ${env.BUILD_NUMBER} - failed (${BUILD_URL})"
+      slackSend channel: "#${SLACK_ALERT_CHANNEL}",
+                color: 'danger',
+                message: "${JOB_NAME} build ${BUILD_NUMBER} - failed (${BUILD_URL})"
+    }
+
+    fixed {
+      slackSend channel: "#${env.SLACK_ALERT_CHANNEL}",
+                color: 'good',
+                message: "${JOB_NAME} build - fixed"
     }
 
   }
