@@ -12,7 +12,7 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
 # Now build the code.
 RUN cd ${APP_ROOT}/frontend && \
-    git checkout e0ed548f15e78939ff337f508e387152f1134f6b && \
+    git checkout 28d028d37382216eb8d070e1c0e3cd5f7402b45f && \
     npm install
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
