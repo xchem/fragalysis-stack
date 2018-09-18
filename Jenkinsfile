@@ -34,13 +34,13 @@ pipeline {
       }
     }
 
-//    stage('Push Image') {
-//      steps {
-//        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
-//        sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}"
-//        sh "podman logout docker.io"
-//      }
-//    }
+    stage('Push Image') {
+      steps {
+        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
+        sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}"
+        sh "podman logout docker.io"
+      }
+    }
 
   }
 
