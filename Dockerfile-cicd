@@ -23,7 +23,9 @@ RUN apt-get install -y nodejs
 #             See: https://stackoverflow.com/questions/15393821/npm-err-cb-never-called
 #             Specifically the comment from Sukhdeep Sing (Oct 24 '16)
 #
-RUN cd ${APP_ROOT}/frontend && npm install npm@latest -g
+RUN cd ${APP_ROOT}/frontend && \
+    npm install npm@latest -g && \
+    npm install
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
 # Symlink these
