@@ -30,13 +30,13 @@ pipeline {
         script {
           TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
         }
+        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
         sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker -f Dockerfile-cicd -t ${IMAGE} ."
       }
     }
 
     stage('Push Image') {
       steps {
-        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
         sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}"
         sh "podman logout docker.io"
       }
