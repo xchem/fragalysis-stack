@@ -4,7 +4,7 @@ ENV APP_ROOT /code
 ENV APP_USER_ID 2000
 RUN useradd -c 'Conatiner user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag
 
-RUN apt-get install -y wget gnupg
+RUN apt-get install -y wget gnupg bzip2
 # Add in the frontend code
 RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 # Now add npm
