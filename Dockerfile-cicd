@@ -22,6 +22,9 @@ RUN apt-get install -y nodejs
 #             the registry-based backend.
 #             Building with Docker, outside the cluster, was fine.
 #
+#             See: https://stackoverflow.com/questions/15393821/npm-err-cb-never-called
+#             Specifically the comment from Sukhdeep Sing (Oct 24 '16)
+#
 RUN cd ${APP_ROOT}/frontend && \
     npm cache clean -f && \
     npm update && \
