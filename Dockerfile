@@ -2,7 +2,7 @@ FROM docker.io/xchem/fragalysis-backend:latest
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
-RUN useradd -c 'Conatiner user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag
+RUN useradd -c 'Container user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag
 
 RUN apt-get install -y wget gnupg bzip2
 # Add in the frontend code
@@ -11,7 +11,7 @@ RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
 # Now build the code
-RUN cd ${APP_ROOT}/frontend && npm install
+RUN cd ${APP_ROOT}/frontend && npm install npm@latest -g
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
 # Symlink these
@@ -23,7 +23,7 @@ RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
 RUN chmod 755 ${APP_ROOT}/makemigrations.sh
 RUN chmod 755 ${APP_ROOT}/launch-stack.sh
 
-RUN chown -R 2000 ${APP_ROOT} /run /var
+RUN chown -R ${APP_USER_ID} ${APP_ROOT} /run /var
 
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]
