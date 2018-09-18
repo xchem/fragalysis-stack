@@ -24,6 +24,7 @@ RUN apt-get install -y nodejs
 #             Specifically the comment from Sukhdeep Sing (Oct 24 '16)
 #
 RUN cd ${APP_ROOT}/frontend && npm install npm@latest -g
+RUN cd ${APP_ROOT}/frontend && npm install
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
 # Symlink these
