@@ -30,7 +30,7 @@ pipeline {
         script {
           TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
         }
-        sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker -f Dockerfile-cicd -t ${IMAGE} ."
+        sh "buildah bud --format docker -f Dockerfile-cicd -t ${IMAGE} ."
       }
     }
 
