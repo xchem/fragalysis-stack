@@ -9,8 +9,7 @@ RUN apt-get install -y wget gnupg bzip2
 RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 # Now add npm
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs && \
-    npm install -g npm@5.6.0
+RUN apt-get install -y nodejs
 # Now build the code
 RUN npm install -g npm@5.6.0
 RUN cd ${APP_ROOT}/frontend && npm install
