@@ -11,21 +11,9 @@ RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
 # Now build the code.
-#
-# Note (abc): The "npm@latest -g" option added to the original "npm install"
-#             command turned out to be crucial in fixing the build. The change
-#             was introduced in response to receiving the error
-#             "npm ERR! cb() never called!" when building in the OpenShift
-#             cluster with buildah 1.1 when using the docker and
-#             internal-registry backend. Building with Docker, outside the
-#             cluster, was error-free.
-#
-#             See: https://stackoverflow.com/questions/15393821/npm-err-cb-never-called
-#             Specifically the comment from Sukhdeep Sing (Oct 24 '16)
-#
 RUN cd ${APP_ROOT}/frontend && \
-    npm install npm@latest -g && \
-    npm install
+    git checkout e0ed548f15e78939ff337f508e387152f1134f6b
+RUN npm install
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
 # Symlink these
