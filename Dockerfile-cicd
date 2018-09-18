@@ -1,4 +1,4 @@
-FROM docker-registry.default:5000/fragalysis-cicd/fragalysis-backend:latest
+FROM xchem/fragalysis-backend:latest
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
