@@ -9,7 +9,7 @@ pipeline {
   environment {
     // Local registry details (for FROM image)
     REGISTRY_USER = 'jenkins'
-    REGISTRY = 'docker-registry.default:5000'
+    REGISTRY = 'docker-registry.default.svc:5000'
     // Destination image (pushed to docker hub)
     IMAGE = 'xchem/fragalysis-stack:latest'
     DOCKER_USER = 'alanbchristie'
