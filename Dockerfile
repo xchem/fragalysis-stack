@@ -11,7 +11,7 @@ RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
 # Now build the code
-RUN cd ${APP_ROOT}/frontend && npm install npm@latest -g
+RUN npm install -g npm@5.6.0
 RUN cd ${APP_ROOT}/frontend && npm install
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
