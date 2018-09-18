@@ -1,4 +1,4 @@
-FROM xchem/fragalysis-backend:latest
+FROM docker-registry.default.svc:5000/fragalysis-cicd/fragalysis-backend:latest
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
@@ -10,11 +10,23 @@ RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
 # Now add npm
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
-# Now build the code
+
+# Now build the code.
+#
+# Note (abc): Don't know how much of the npm commands are required
+#             but the "npm@latest -g --no-package-lock" options added to the
+#             original "npm install" command turned out to be crucial in
+#             fixing the build. The changes were introduced in response to
+#             receiving the error "npm ERR! cb() never called!" when building
+#             in the OpenShift cluster with buildah 1.1 with or without
+#             the registry-based backend.
+#             Building with Docker, outside the cluster, was fine.
+#
 RUN cd ${APP_ROOT}/frontend && \
     npm cache clean -f && \
     npm update && \
     npm install npm@latest -g --no-package-lock
+
 ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 
 # Symlink these
