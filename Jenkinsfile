@@ -11,7 +11,7 @@ pipeline {
     REGISTRY_USER = 'jenkins'
     REGISTRY = 'docker-registry.default.svc:5000'
     // Destination image (pushed to docker hub)
-    IMAGE = 'xchem/fragalysis-stack:latest'
+    IMAGE = 'xchem/fragalysis-stack'
     DOCKER_USER = 'alanbchristie'
     DOCKER_PASSWORD = credentials('abcDockerPassword')
 
@@ -23,6 +23,13 @@ pipeline {
 
   stages {
 
+    // The Jenkins Job is expected to be parameterised,
+    // and provides the following variables: -
+    //
+    // FE_GIT_PROJECT The name of the upstream FE project
+    //                typically 'xchem'
+    // IMAGE_TAG      The tag to apply to the built stack image
+    //                Typically 'latest'
     stage('Build Image') {
       steps {
         slackSend channel: "#${SLACK_BUILD_CHANNEL}",
@@ -30,7 +37,7 @@ pipeline {
         script {
           TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
         }
-        sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker -f Dockerfile-cicd -t ${IMAGE} ."
+        sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker --build-arg FE_GIT_PROJECT=${FE_GIT_PROJECT} -f Dockerfile-cicd -t ${IMAGE}:${IMAGE_TAG} ."
       }
     }
 
