@@ -6,7 +6,9 @@
 // and must provide the following variables: -
 //
 // FE_GIT_PROJECT The name of the upstream FE project.
-//                Typically 'xchem'
+//                Typically 'xchem'.
+//                The built docker image is only pushed to docker
+//                if this variable's value is 'xchem'
 // IMAGE_TAG      The tag to apply to the built stack image.
 //                Typically 'latest'
 
@@ -42,13 +44,16 @@ pipeline {
       }
     }
 
-//    stage('Push Image') {
-//      steps {
-//        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
-//        sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}"
-//        sh "podman logout docker.io"
-//      }
-//    }
+    stage('Push Image') {
+      when {
+        expression { FE_GIT_PROJECT == 'xchem' }
+      }
+      steps {
+        sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
+        sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}:${IMAGE_TAG}"
+        sh "podman logout docker.io"
+      }
+    }
 
   }
 
