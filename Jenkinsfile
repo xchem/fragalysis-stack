@@ -1,6 +1,14 @@
 #!groovy​
 
 // The 'xchem' Fragalysis Stack Jenkinsfile.
+//
+// The Jenkins Job that uses this Jenkinsfile is expected to be parameterised,
+// and must provide the following variables: -
+//
+// FE_GIT_PROJECT The name of the upstream FE project.
+//                Typically 'xchem'
+// IMAGE_TAG      The tag to apply to the built stack image.
+//                Typically 'latest'
 
 pipeline {
 
@@ -23,13 +31,6 @@ pipeline {
 
   stages {
 
-    // The Jenkins Job is expected to be parameterised,
-    // and provides the following variables: -
-    //
-    // FE_GIT_PROJECT The name of the upstream FE project
-    //                typically 'xchem'
-    // IMAGE_TAG      The tag to apply to the built stack image
-    //                Typically 'latest'
     stage('Build Image') {
       steps {
         slackSend channel: "#${SLACK_BUILD_CHANNEL}",
