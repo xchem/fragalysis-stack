@@ -22,7 +22,9 @@ pipeline {
     REGISTRY = 'docker-registry.default.svc:5000'
     // Destination image (pushed to docker hub)
     IMAGE = 'xchem/fragalysis-stack'
-    DOCKER_USER = 'alanbchristie'
+
+    // Docker hub credentials
+    DOCKER_USER = credentials('abcDockerUser')
     DOCKER_PASSWORD = credentials('abcDockerPassword')
 
     // Slack channel for all notifications
