@@ -1,49 +1,79 @@
 version: '3'
 
 services:
+
+  # The Stack (Django) database instance.
+  #
+  # Initialised by the stack and populated by the loader.
+  # We expect a local directory to permit DB persistence
+  # between container restarts.
+
   mysql:
     image: mysql:5.7.23
     volumes:
-       - ../django_data:/var/lib/mysql
+    - ../data/mysql/data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: django_db
       MYSQL_PASSWORD: django_password
       MYSQL_USER: django
-  cartridge:
-    image: informaticsmatters/rdkit_cartridge:Release_2017_09_1
-    user: root
-    environment:
-      - POSTGRES_PASSWORD=password
-    volumes:
-      - ../cartridge_data:/var/lib/postgresql/data
-  graph:
-    container_name: neo4j
-    image: neo4j
-    command: /bin/bash -c "sleep 1000"
+
+  # The molecule graph instance.
+  #
+  # A graph with a built-in molecule network.
+
+  neo4j:
+    container_name: graph
+    image: xchem/graph:latest
     ports:
-# Comment these two out in produciton
-      - "7474:7474"
-      - "7687:7687"
+    - "7474:7474"
+    - "7687:7687"
     ulimits:
       nofile:
         soft: 40000
         hard: 40000
     volumes:
-      - ../neo4j/data:/data
-      - ../neo4j/logs:/logs
+    - ../data/neo4j/data:/data
+    - ../data/neo4j/logs:/logs
     environment:
-      - NEO4J_AUTH=none
-      - NEO4J_dbms_memory_pagecache_size=4G
+    - NEO4J_AUTH=none
+    - NEO4J_dbms_memory_pagecache_size=4G
+
+  # The stack (web) application.
+  #
+  # Needs a SQL and Graph database.
+  # We expect a local directory to permit app and log persistence
+  # between container restarts.
+
   web:
     image: xchem/fragalysis-stack:latest
     command: /bin/bash /code/launch-stack.sh
     volumes:
-      - ../logs:/code/logs/
-      - ../media:/code/media/
+    - ../data/stack/logs:/code/logs/
+    - ../data/stack/media:/code/media/
     ports:
-      - "80:80"
+    - "8080:80"
     depends_on:
-      - mysql
-      - graph
-      - cartridge
+    - mysql
+    - neo4j
+
+  # The application loader.
+  #
+  # This needs to run once to load the SQL database
+  # from a DATA_ORIGIN expected in the mounted inout data.
+
+  loader:
+    image: xchem/loader:latest
+    volumes:
+    - ../data/input:/fragalysis
+    - ../data/stack/media:/code/media
+    environment:
+      DATA_ORIGIN: EXAMPLE
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: django_db
+      MYSQL_PASSWORD: django_password
+      MYSQL_USER: django
+    depends_on:
+    - mysql
+    - neo4j
+    - web
