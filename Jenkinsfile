@@ -52,7 +52,7 @@ pipeline {
       }
       steps {
         sh "podman login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD} docker.io"
-        sh "buildah push ${IMAGE} docker://docker.io/${IMAGE}:${IMAGE_TAG}"
+        sh "buildah push ${IMAGE}:${IMAGE_TAG} docker://docker.io/${IMAGE}:${IMAGE_TAG}"
         sh "podman logout docker.io"
       }
     }
