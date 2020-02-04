@@ -5,12 +5,16 @@
 // The Jenkins Job that uses this Jenkinsfile is expected to be parameterised,
 // and must provide the following variables: -
 //
-// FE_GIT_PROJECT The name of the upstream FE project.
-//                Typically 'xchem'.
-//                The built docker image is only pushed to docker
-//                if this variable's value is 'xchem'
-// IMAGE_TAG      The tag to apply to the built stack image.
-//                Typically 'latest'
+// FE_GIT_PROJECT        The name of the upstream FE project.
+//                       Typically 'xchem'.
+//                       The built docker image is only pushed to docker
+//                       if this variable's value is 'xchem'
+//
+// FE_GIT_PROJECT_BRANCH A branch of the upstream FE project.
+//                       Typically 'master'.
+//
+// IMAGE_TAG             The tag to apply to the built stack image.
+//                       Typically 'latest'
 
 pipeline {
 
@@ -42,7 +46,7 @@ pipeline {
         script {
           TOKEN = sh(script: 'oc whoami -t', returnStdout: true).trim()
         }
-        sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker --build-arg FE_GIT_PROJECT=${FE_GIT_PROJECT} -f Dockerfile-cicd -t ${IMAGE}:${IMAGE_TAG} ."
+        sh "buildah bud --tls-verify=false --creds=${REGISTRY_USER}:${TOKEN} --format docker --build-arg FE_GIT_PROJECT=${FE_GIT_PROJECT} --build-arg FE_GIT_PROJECT_BRANCH=${FE_GIT_PROJECT_BRANCH} -f Dockerfile-cicd -t ${IMAGE}:${IMAGE_TAG} ."
       }
     }
 
