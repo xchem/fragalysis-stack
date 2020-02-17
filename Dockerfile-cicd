@@ -10,8 +10,8 @@ RUN apt-get install -y wget gnupg bzip2
 # By default this is hosted on the xchem project's master branch
 # but it can be redirected with a couple of build-args.
 ARG FE_GIT_PROJECT=xchem
-ARG FE_GIT_BRANCH=master
-RUN git clone --single-branch --branch ${FE_GIT_BRANCH} \
+ARG FE_GIT_PROJECT_BRANCH=master
+RUN git clone --single-branch --branch ${FE_GIT_PROJECT_BRANCH} \
         https://github.com/${FE_GIT_PROJECT}/fragalysis-frontend ${APP_ROOT}/frontend
 
 # Install yarn (instead of npm)
