@@ -1,4 +1,6 @@
-FROM xchem/fragalysis-backend:latest
+ARG BE_IMAGE_PROJECT=xchem
+ARG BE_IMAGE_TAG=latest
+FROM $BE_IMAGE_PROJECT/fragalysis-backend:$BE_IMAGE_TAG
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
