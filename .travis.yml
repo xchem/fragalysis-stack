@@ -21,6 +21,10 @@ stages:
   if: |
     branch = im-travis \
     AND env(PUBLISH_IMAGES) = yes
+- name: trigger awx
+  if: |
+    branch = im-travis \
+    AND env(PUBLISH_IMAGES) = yes
 - name: publish tag
   if: |
     tag IS present \
@@ -30,12 +34,6 @@ stages:
     tag IS present \
     AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
     AND env(PUBLISH_IMAGES) = yes
-- name: trigger awx
-  if: |
-    tag IS present \
-    AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
-    AND env(PUBLISH_IMAGES) = yes \
-    AND env(TRIGGER_AWX) = yes
 
 before_install:
 # The user can define the following variables in their Travis Settings.
