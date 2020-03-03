@@ -1,15 +1,85 @@
-sudo: required
+---
+
+# In your Travis Settings...
+#
+# set PUBLISH_IMAGES to 'yes' to enable publishing to Docker Hub
+# and TRIGGER_AWX to 'yes' to enable AWX job triggering.
+# Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES is also set.
+#
+# AWX Jobs triggered by activity in this repository are: -
+#
+#   Fragalysis Stack
+
+os: linux
 services:
-  - docker
+- docker
+
+stages:
+- name: test
+- name: publish latest
+  if: |
+    branch = im-travis \
+    AND env(PUBLISH_IMAGES) = yes
+- name: publish tag
+  if: |
+    tag IS present \
+    AND env(PUBLISH_IMAGES) = yes
+- name: publish stable
+  if: |
+    tag IS present \
+    AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
+    AND env(PUBLISH_IMAGES) = yes
+- name: trigger awx
+  if: |
+    tag IS present \
+    AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
+    AND env(PUBLISH_IMAGES) = yes \
+    AND env(TRIGGER_AWX) = yes
+
+before_install:
+# The user can define the following variables in their Travis Settings.
+# If they're not defined then apply sensible defaults.
+- export BE_NAMESPACE=${BE_NAMESPACE-xchem}
+- export STACK_NAMESPACE=${STACK_NAMESPACE:-xchem}
+- echo ${PUBLISH_IMAGES}
+- echo ${TRIGGER_AWX}
+
 install:
-  - docker build -t xchem/fragalysis-stack .
-script:
-  -  docker-compose -f docker-compose.test.yml up --build  --exit-code-from tests --abort-on-container-exit
-after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push xchem/fragalysis-stack;
-    fi
-  - coveralls
+# Login to docker and download trigger code
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
+jobs:
+  include:
 
+  # Test-stage jobs...
+
+  - stage: test
+    name: Container Test
+    script:
+    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
+    - docker-compose -f docker-compose.test.yml up --build --exit-code-from tests --abort-on-container-exit
+
+  # Publish-stage jobs...
+  # Every successful master build results in a latest image
+  # and every tag results in a tagged image in Docker Hub.
+  # Tags that match a RegEx are considered 'official' tags
+  # and also result in a 'stable' image tag.
+
+  - stage: publish latest
+    name: Latest Container
+    script:
+    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
+    - docker push ${STACK_NAMESPACE}/fragalysis-stack:latest
+
+  - stage: publish tag
+    name: Tagged Container
+    script:
+    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} .
+    - docker push ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
+
+  - stage: publish stable
+    name: Stable Container
+    script:
+    - docker pull ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
+    - docker tag ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} ${STACK_NAMESPACE}/fragalysis-stack:stable
+    - docker push ${STACK_NAMESPACE}/fragalysis-stack:stable
