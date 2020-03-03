@@ -2,8 +2,9 @@
 
 # In your Travis Settings...
 #
-# set PUBLISH_IMAGES to 'yes' to enable publishing to Docker Hub
-# and TRIGGER_AWX to 'yes' to enable AWX job triggering.
+# Set PUBLISH_IMAGES to 'yes' to enable publishing to Docker Hub.
+# You will also need to provide values for  DOCKER_USERNAME and DOCKER_PASSWORD.
+# Set TRIGGER_AWX to 'yes' to enable AWX job triggering.
 # Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES is also set.
 #
 # AWX Jobs triggered by activity in this repository are: -
@@ -44,10 +45,6 @@ before_install:
 - echo ${PUBLISH_IMAGES}
 - echo ${TRIGGER_AWX}
 
-install:
-# Login to docker and download trigger code
-- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-
 jobs:
   include:
 
@@ -56,6 +53,7 @@ jobs:
   - stage: test
     name: Container Test
     script:
+    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
     - docker-compose -f docker-compose.test.yml up --build --exit-code-from tests --abort-on-container-exit
 
@@ -68,18 +66,21 @@ jobs:
   - stage: publish latest
     name: Latest Container
     script:
+    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:latest
 
   - stage: publish tag
     name: Tagged Container
     script:
+    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
 
   - stage: publish stable
     name: Stable Container
     script:
+    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker pull ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
     - docker tag ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} ${STACK_NAMESPACE}/fragalysis-stack:stable
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:stable
