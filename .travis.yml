@@ -13,9 +13,9 @@
 #
 # You control the Stack container's source and destination image names with...
 #
-# BE_NAMESPACE      To over-ride the default namespace of the backend image
-#                   (which is 'xchem').
-# STACK_NAMESPACE   To over-rise the default namespace of the produced
+# BE_NAMESPACE      To over-ride the default namespace of the source backend
+#                   image (which is 'xchem')
+# STACK_NAMESPACE   To over-ride the default namespace of the produced
 #                   stack container image (which is 'xchem')
 #
 # You control deployment/delivery with...
