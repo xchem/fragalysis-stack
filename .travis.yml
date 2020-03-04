@@ -40,21 +40,17 @@ services:
 - docker
 
 stages:
-- name: publish latest
+- name: build
+- name: build stable
+  if: |
+    tag IS present \
+    AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
+    AND env(PUBLISH_IMAGES) = yes
 - name: trigger awx
   if: |
     branch = im-travis \
     AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
-- name: publish tag
-  if: |
-    tag IS present \
-    AND env(PUBLISH_IMAGES) = yes
-- name: publish stable
-  if: |
-    tag IS present \
-    AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
-    AND env(PUBLISH_IMAGES) = yes
 
 before_install:
 # The user can define the following variables in their Travis Settings.
@@ -77,9 +73,14 @@ before_script:
 jobs:
   include:
 
-  # Test-stage jobs...
+  # Published (pushed) images...
+  #
+  # Every successful master build results in a latest image (above)
+  # and every tag results in a tagged image.
+  # Tags that match a RegEx are considered 'official' releases
+  # and also result in a 'stable' image.
 
-  - stage: publish latest
+  - stage: build
     name: Test and Latest Container
     script:
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} .
@@ -88,19 +89,16 @@ jobs:
       docker push ${STACK_NAMESPACE}/fragalysis-stack:latest;
       fi
 
-  # Publish-stage jobs...
-  # Every successful master build results in a latest image (above)
-  # and every tag results in a tagged image in Docker Hub.
-  # Tags that match a RegEx are considered 'official' tags
-  # and also result in a 'stable' image tag.
-
-  - stage: publish tag
+  - stage: build
     name: Tagged Container
     script:
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
+    if: tag IS present AND env(PUBLISH_IMAGES) = yes
 
-  - stage: publish stable
+  # Jobs that run after the main (latest and tagged) builds...
+
+  - stage: build stable
     name: Stable Container
     script:
     - docker pull ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
