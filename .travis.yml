@@ -30,7 +30,8 @@ stages:
 - name: trigger awx
   if: |
     branch = im-travis \
-    AND env(PUBLISH_IMAGES) = yes
+    AND env(PUBLISH_IMAGES) = yes \
+    AND env(TRIGGER_AWX) = yes
 - name: publish tag
   if: |
     tag IS present \
