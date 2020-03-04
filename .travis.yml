@@ -7,11 +7,17 @@
 # Set TRIGGER_AWX to 'yes' to enable AWX job triggering.
 # Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES is also set.
 #
-# AWX Jobs triggered by activity in this repository are: -
+# If you set TRIGGER_AWX you must also set the following: -
 #
-#   Fragalysis Stack
+# - AWX_HOST (the fully-qualified URL to AWX)
+# - AWX_JOB_NAME (The name of the Job to run)
+# - AWX_USER (The username of someone that can run the Job)
+# - AWX_USER_PASSWORD (The user's password)
 
 os: linux
+language: python
+python:
+- '3.8'
 services:
 - docker
 
@@ -82,3 +88,9 @@ jobs:
     - docker pull ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
     - docker tag ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} ${STACK_NAMESPACE}/fragalysis-stack:stable
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:stable
+
+  - stage: trigger awx
+    name: Trigger AWX
+    script:
+    - pip install -r awx/requirements.txt
+    - ./awx/trigger.sh
