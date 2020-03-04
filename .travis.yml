@@ -11,8 +11,8 @@
 #
 # - AWX_HOST (the fully-qualified URL to AWX)
 # - AWX_JOB_NAME The name of the Job to run.
-#                Avoid encrypting this one
-#               as you'll need to escape characters like whitespace
+#                Avoid encrypting this one but make sure you use double-quotes
+#                as you'll need to escape characters like whitespace
 # - AWX_USER (The username of someone that can run the Job)
 # - AWX_USER_PASSWORD (The user's password)
 
@@ -25,10 +25,6 @@ services:
 
 stages:
 - name: test
-- name: publish latest
-  if: |
-    branch = im-travis \
-    AND env(PUBLISH_IMAGES) = yes
 - name: trigger awx
   if: |
     branch = im-travis \
@@ -68,18 +64,15 @@ jobs:
     script:
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
     - docker-compose -f docker-compose.test.yml up --build --exit-code-from tests --abort-on-container-exit
+    - if [ ${PUBLISH_IMAGES} == "yes" ]; then
+      docker push ${STACK_NAMESPACE}/fragalysis-stack:latest;
+      fi
 
   # Publish-stage jobs...
   # Every successful master build results in a latest image
   # and every tag results in a tagged image in Docker Hub.
   # Tags that match a RegEx are considered 'official' tags
   # and also result in a 'stable' image tag.
-
-  - stage: publish latest
-    name: Latest Container
-    script:
-    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
-    - docker push ${STACK_NAMESPACE}/fragalysis-stack:latest
 
   - stage: publish tag
     name: Tagged Container
