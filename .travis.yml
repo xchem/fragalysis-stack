@@ -52,6 +52,12 @@ before_install:
 - echo ${PUBLISH_IMAGES}
 - echo ${TRIGGER_AWX}
 
+install:
+- pip install -r awx/requirements.txt
+
+before_script:
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
 jobs:
   include:
 
@@ -60,7 +66,6 @@ jobs:
   - stage: test
     name: Container Test
     script:
-    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
     - docker-compose -f docker-compose.test.yml up --build --exit-code-from tests --abort-on-container-exit
 
@@ -73,21 +78,18 @@ jobs:
   - stage: publish latest
     name: Latest Container
     script:
-    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:latest
 
   - stage: publish tag
     name: Tagged Container
     script:
-    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
 
   - stage: publish stable
     name: Stable Container
     script:
-    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - docker pull ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
     - docker tag ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} ${STACK_NAMESPACE}/fragalysis-stack:stable
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:stable
@@ -95,5 +97,4 @@ jobs:
   - stage: trigger awx
     name: Trigger AWX
     script:
-    - pip install -r awx/requirements.txt
     - ./awx/trigger.sh
