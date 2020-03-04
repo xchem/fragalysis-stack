@@ -10,7 +10,9 @@
 # If you set TRIGGER_AWX you must also set the following: -
 #
 # - AWX_HOST (the fully-qualified URL to AWX)
-# - AWX_JOB_NAME (The name of the Job to run)
+# - AWX_JOB_NAME The name of the Job to run.
+#                Avoid encrypting this one
+#               as you'll need to escape characters like whitespace
 # - AWX_USER (The username of someone that can run the Job)
 # - AWX_USER_PASSWORD (The user's password)
 
