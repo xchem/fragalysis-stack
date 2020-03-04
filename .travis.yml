@@ -1,20 +1,34 @@
 ---
 
-# In your Travis Settings...
+# -----------------
+# Control variables (Travis Settings)
+# -----------------
 #
-# Set PUBLISH_IMAGES to 'yes' to enable publishing to Docker Hub.
-# You will also need to provide values for  DOCKER_USERNAME and DOCKER_PASSWORD.
-# Set TRIGGER_AWX to 'yes' to enable AWX job triggering.
-# Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES is also set.
+# PUBLISH_IMAGES    Should be 'yes' to enable publishing to Docker Hub.
 #
-# If you set TRIGGER_AWX you must also set the following: -
+# If you set PUBLISH_IMAGES you must also set the following: -
 #
-# - AWX_HOST (the fully-qualified URL to AWX)
-# - AWX_JOB_NAME The name of the Job to run.
-#                Avoid encrypting this one but make sure you use double-quotes
-#                as you'll need to escape characters like whitespace
-# - AWX_USER (The username of someone that can run the Job)
-# - AWX_USER_PASSWORD (The user's password)
+# DOCKER_USERNAME   If PUBLISH_IMAGES is 'yes'
+# DOCKER_PASSWORD   If PUBLISH_IMAGES is 'yes'
+#
+# You control the Stack container's source and destination image names with...
+#
+# BE_NAMESPACE      To over-ride the default namespace of the backend image
+#                   (which is 'xchem').
+# STACK_NAMESPACE   To over-rise the default namespace of the produced
+#                   stack container image (which is 'xchem')
+#
+# You control deployment/delivery with...
+#
+# TRIGGER_AWX       Should be set to 'yes' to trigger the chosen AWX Job.
+#                   Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES
+#                   is also set.
+# AWX_HOST          The fully-qualified URL to AWX)
+# AWX_JOB_NAME      The name of the Job to run.
+#                   Avoid encrypting this one but make sure you use double-quotes
+#                   if there are any spaces in the Job name.
+# AWX_USER          The username of someone that can execute the AWX Job
+# AWX_USER_PASSWORD The user's password
 
 os: linux
 language: python
