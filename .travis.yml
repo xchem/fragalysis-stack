@@ -45,13 +45,15 @@ before_install:
 # If they're not defined then apply sensible defaults.
 - export BE_NAMESPACE=${BE_NAMESPACE-xchem}
 - export STACK_NAMESPACE=${STACK_NAMESPACE:-xchem}
-- echo ${PUBLISH_IMAGES}
-- echo ${TRIGGER_AWX}
 
 install:
 - pip install -r awx/requirements.txt
 
 before_script:
+- echo ${BE_NAMESPACE}
+- echo ${STACK_NAMESPACE}
+- echo ${PUBLISH_IMAGES}
+- echo ${TRIGGER_AWX}
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
 jobs:
