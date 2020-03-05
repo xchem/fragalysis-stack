@@ -25,12 +25,12 @@
 # TRIGGER_AWX       Should be set to 'yes' to trigger the chosen AWX Job.
 #                   Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES
 #                   is also set.
-# AWX_HOST          The fully-qualified URL to AWX)
+# AWX_HOST          The fully-qualified URL to AWX.
 # AWX_JOB_NAME      The name of the Job to run.
 #                   Avoid encrypting this one but make sure you use double-quotes
 #                   if there are any spaces in the Job name.
-# AWX_USER          The username of someone that can execute the AWX Job
-# AWX_USER_PASSWORD The user's password
+# AWX_USER          The username of someone that can execute the AWX Job.
+# AWX_USER_PASSWORD The user's password.
 
 os: linux
 language: python
@@ -52,6 +52,11 @@ stages:
     AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
 
+env:
+  global:
+  # The origin of the trigger code
+  - TRIGGER_ORIGIN=https://raw.githubusercontent.com/informaticsmatters/trigger-awx/master
+
 before_install:
 # The user can define the following variables in their Travis Settings.
 # If they're not defined then apply sensible defaults.
@@ -60,7 +65,10 @@ before_install:
 - export STACK_NAMESPACE=${STACK_NAMESPACE:-xchem}
 
 install:
-- pip install -r awx/requirements.txt
+- curl --location --retry 3 ${TRIGGER_ORIGIN}/requirements.txt --output trigger-awx-requirements.txt
+- curl --location --retry 3 ${TRIGGER_ORIGIN}/trigger-travis.sh --output trigger-awx.sh
+- pip install -r trigger-awx-requirements.txt
+- chmod +x trigger-awx.sh
 
 before_script:
 - echo ${BE_NAMESPACE}
@@ -107,5 +115,4 @@ jobs:
 
   - stage: trigger awx
     name: Trigger AWX
-    script:
-    - ./awx/trigger.sh
+    script: . /trigger-awx.sh
