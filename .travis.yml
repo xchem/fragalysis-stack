@@ -115,4 +115,4 @@ jobs:
 
   - stage: trigger awx
     name: Trigger AWX
-    script: . /trigger-awx.sh
+    script: ./trigger-awx.sh
