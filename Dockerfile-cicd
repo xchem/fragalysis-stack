@@ -7,10 +7,12 @@ RUN apt-get update -y
 RUN apt-get install -y wget gnupg bzip2
 
 # Add in the frontend code
-# By default this is hosted in the xchem project
-# but it can be redirected.
+# By default this is hosted on the xchem project's master branch
+# but it can be redirected with a couple of build-args.
 ARG FE_GIT_PROJECT=xchem
-RUN git clone https://github.com/${FE_GIT_PROJECT}/fragalysis-frontend ${APP_ROOT}/frontend
+ARG FE_GIT_PROJECT_BRANCH=master
+RUN git clone --single-branch --branch ${FE_GIT_PROJECT_BRANCH} \
+        https://github.com/${FE_GIT_PROJECT}/fragalysis-frontend ${APP_ROOT}/frontend
 
 # Install yarn (instead of npm)
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
