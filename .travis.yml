@@ -128,4 +128,4 @@ jobs:
 
   - stage: trigger awx tag
     name: Trigger AWX (tag)
-    script: ./trigger-awx-tag.sh ${TRAVIS_TAG} stack_image_tag "Production Fragalysis Stack"
+    script: ./trigger-awx-tag.sh ${TRAVIS_TAG} stack_image_tag "Production Fragalysis Stack (Version Change)"
