@@ -45,14 +45,12 @@ stages:
     AND env(PUBLISH_IMAGES) = yes
 - name: trigger awx staging
   if: |
-    branch = im-travis \
-    AND env(PUBLISH_IMAGES) = yes \
+    env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
 - name: trigger awx production
   if: |
     tag IS present \
     AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
-    branch = im-travis \
     AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
 
