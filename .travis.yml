@@ -26,7 +26,7 @@
 #                   Enabling TRIGGER_AWX is only effective if PUBLISH_IMAGES
 #                   is also set.
 # AWX_HOST          The fully-qualified URL to AWX.
-# AWX_JOB_NAME      The name of the Job to run.
+# AWX_JOB_NAME      The name of the Job to run for each 'latest' build.
 #                   Avoid encrypting this one but make sure you use double-quotes
 #                   if there are any spaces in the Job name.
 # AWX_USER          The username of someone that can execute the AWX Job.
@@ -51,11 +51,18 @@ stages:
     branch = im-travis \
     AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
+- name: trigger awx tag
+  if: |
+    tag IS present \
+    AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
+    branch = im-travis \
+    AND env(PUBLISH_IMAGES) = yes \
+    AND env(TRIGGER_AWX) = yes
 
 env:
   global:
   # The origin of the trigger code
-  - TRIGGER_ORIGIN=https://raw.githubusercontent.com/informaticsmatters/trigger-awx/master
+  - TRIGGER_ORIGIN=https://raw.githubusercontent.com/informaticsmatters/trigger-awx/1.0.0
 
 before_install:
 # The user can define the following variables in their Travis Settings.
@@ -67,8 +74,10 @@ before_install:
 install:
 - curl --location --retry 3 ${TRIGGER_ORIGIN}/requirements.txt --output trigger-awx-requirements.txt
 - curl --location --retry 3 ${TRIGGER_ORIGIN}/trigger-awx.sh --output trigger-awx.sh
+- curl --location --retry 3 ${TRIGGER_ORIGIN}/trigger-awx-tag.sh --output trigger-awx-tag.sh
 - pip install -r trigger-awx-requirements.txt
 - chmod +x trigger-awx.sh
+- chmod +x trigger-awx-tag.sh
 
 before_script:
 - echo ${BE_NAMESPACE}
@@ -116,3 +125,7 @@ jobs:
   - stage: trigger awx
     name: Trigger AWX
     script: ./trigger-awx.sh
+
+  - stage: trigger awx tag
+    name: Trigger AWX (tag)
+    script: ./trigger-awx-tag.sh ${TRAVIS_TAG} stack_image_tag "Production Fragalysis Stack"
