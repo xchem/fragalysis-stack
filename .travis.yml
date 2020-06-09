@@ -46,7 +46,7 @@ stages:
 - name: trigger awx staging
   if: |
     NOT tag IS present \
-    env(PUBLISH_IMAGES) = yes \
+    AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
 - name: trigger awx production
   if: |
