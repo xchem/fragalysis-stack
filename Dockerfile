@@ -1,13 +1,18 @@
-FROM xchem/fragalysis-backend:latest
+ARG BE_NAMESPACE="xchem"
+ARG BE_IMAGE_TAG="latest"
+FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
 RUN useradd -c 'Container user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag
-
-# RUN apt-get update -y
+RUN apt-get update -y
 RUN apt-get install -y wget gnupg bzip2
+
 # Add in the frontend code
-RUN git clone https://github.com/xchem/fragalysis-frontend ${APP_ROOT}/frontend
+# By default this is hosted in the xchem project
+# but it can be redirected.
+ARG FE_GIT_PROJECT=xchem
+RUN git clone https://github.com/${FE_GIT_PROJECT}/fragalysis-frontend ${APP_ROOT}/frontend
 
 # Install yarn (instead of npm)
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
@@ -32,6 +37,9 @@ RUN chmod 755 ${APP_ROOT}/makemigrations.sh
 RUN chmod 755 ${APP_ROOT}/launch-stack.sh
 
 RUN chown -R ${APP_USER_ID} ${APP_ROOT} /run /var
+
+ADD LICENSE /LICENSE
+ADD README.md /README.md
 
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]

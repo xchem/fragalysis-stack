@@ -1,49 +1,56 @@
 version: '3'
 
 services:
-  mysql:
-    image: mysql:5.7.23
+  database:
+    image: postgres:12.2
     volumes:
-       - ../django_data:/var/lib/mysql
+    - ../django_data:/var/lib/postgresql/data
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: django_db
-      MYSQL_PASSWORD: django_password
-      MYSQL_USER: django
+      POSTGRES_PASSWORD: fragalysis
+      POSTGRES_DB: frag
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+    - "5432:5432"
   cartridge:
     image: informaticsmatters/rdkit_cartridge:Release_2017_09_1
     user: root
     environment:
-      - POSTGRES_PASSWORD=password
+    - POSTGRES_PASSWORD=password
     volumes:
-      - ../cartridge_data:/var/lib/postgresql/data
+    - ../cartridge_data:/var/lib/postgresql/data
   graph:
     container_name: neo4j
     image: neo4j
     command: /bin/bash -c "sleep 1000"
     ports:
 # Comment these two out in produciton
-      - "7474:7474"
-      - "7687:7687"
+    - "7474:7474"
+    - "7687:7687"
     ulimits:
       nofile:
         soft: 40000
         hard: 40000
     volumes:
-      - ../neo4j/data:/data
-      - ../neo4j/logs:/logs
+    - ../neo4j/data:/data
+    - ../neo4j/logs:/logs
     environment:
-      - NEO4J_AUTH=none
-      - NEO4J_dbms_memory_pagecache_size=4G
+    - NEO4J_AUTH=none
+    - NEO4J_dbms_memory_pagecache_size=4G
   web:
     image: xchem/fragalysis-stack:latest
     command: /bin/bash /code/launch-stack.sh
     volumes:
-      - ../logs:/code/logs/
-      - ../media:/code/media/
+    - ../logs:/code/logs/
+    - ../media:/code/media/
+    environment:
+      POSTGRESQL_DATABASE: frag
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: fragalysis
+      POSTGRESQL_HOST: database
+      POSTGRESQL_PORT: 5432
     ports:
-      - "80:80"
+    - "80:80"
     depends_on:
-      - mysql
-      - graph
-      - cartridge
+    - database
+    - graph
+    - cartridge
