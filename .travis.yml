@@ -47,17 +47,19 @@ stages:
   if: |
     NOT tag IS present \
     AND env(PUBLISH_IMAGES) = yes \
-    AND env(TRIGGER_AWX) = yes
+    AND env(TRIGGER_AWX) = yes \
+    AND NOT env(AWX_DEV_JOB_NAME) IS present
 - name: trigger awx production
   if: |
     tag IS present \
     AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
     AND env(PUBLISH_IMAGES) = yes \
-    AND env(TRIGGER_AWX) = yes
+    AND env(TRIGGER_AWX) = yes \
+    AND NOT env(AWX_DEV_JOB_NAME) IS present
 - name: trigger awx developer
   if: |
     NOT tag IS present \
-    AND env(AWX_DEV_JOB_NAME) \
+    AND env(AWX_DEV_JOB_NAME) IS present \
     AND env(TRIGGER_AWX) = yes
 
 env:
