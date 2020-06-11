@@ -54,6 +54,11 @@ stages:
     AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
     AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
+- name: trigger awx developer
+  if: |
+    NOT tag IS present \
+    AND env(AWX_DEV_JOB_NAME) \
+    AND env(TRIGGER_AWX) = yes
 
 env:
   global:
@@ -123,3 +128,8 @@ jobs:
   - stage: trigger awx production
     name: Trigger AWX Production
     script: ./trigger-awx-tag.sh ${TRAVIS_TAG} stack_image_tag "Production Fragalysis Stack (Version Change)"
+    
+  - stage: trigger awx developer
+    name: Trigger AWX Developer
+    script: ./trigger-awx-tag.sh latest stack_image_tag "${AWX_DEV_JOB_NAME}"
+    
