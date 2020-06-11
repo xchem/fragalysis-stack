@@ -1,5 +1,4 @@
 ---
-
 # -----------------
 # Control variables (Travis Settings)
 # -----------------
@@ -28,14 +27,12 @@
 # AWX_HOST          The fully-qualified URL to AWX.
 # AWX_USER          The username of someone that can execute the AWX Job.
 # AWX_USER_PASSWORD The user's password.
-
 os: linux
 language: python
 python:
 - '3.8'
 services:
 - docker
-
 stages:
 - name: build
 - name: build stable
@@ -54,25 +51,26 @@ stages:
     AND tag =~ ^([0-9]+\.){1,2}[0-9]+$ \
     AND env(PUBLISH_IMAGES) = yes \
     AND env(TRIGGER_AWX) = yes
-
+- name: trigger awx developer
+  if: |
+    NOT tag IS present \
+    AND env(AWX_DEV_JOB_NAME) \
+    AND env(TRIGGER_AWX) = yes
 env:
   global:
   # The origin of the trigger code
   - TRIGGER_ORIGIN=https://raw.githubusercontent.com/informaticsmatters/trigger-awx/1.0.0
-
 before_install:
 # The user can define the following variables in their Travis Settings.
 # If they're not defined then apply sensible defaults.
 - export BE_NAMESPACE=${BE_NAMESPACE:-xchem}
 - export BE_IMAGE_TAG=${BE_IMAGE_TAG:-latest}
 - export STACK_NAMESPACE=${STACK_NAMESPACE:-xchem}
-
 install:
 - curl --location --retry 3 ${TRIGGER_ORIGIN}/requirements.txt --output trigger-awx-requirements.txt
 - curl --location --retry 3 ${TRIGGER_ORIGIN}/trigger-awx-tag.sh --output trigger-awx-tag.sh
 - pip install -r trigger-awx-requirements.txt
 - chmod +x trigger-awx-tag.sh
-
 before_script:
 - echo ${BE_NAMESPACE}
 - echo ${BE_IMAGE_TAG}
@@ -80,17 +78,14 @@ before_script:
 - echo ${PUBLISH_IMAGES}
 - echo ${TRIGGER_AWX}
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-
 jobs:
   include:
-
   # Published (pushed) images...
   #
   # Every successful master build results in a latest image
   # and every tag results in a tagged image.
   # Tags that match a RegEx are considered 'official' releases
   # and also result in a 'stable' image.
-
   - stage: build
     name: Test and Latest Container
     script:
@@ -99,27 +94,26 @@ jobs:
     - if [ ${PUBLISH_IMAGES} == "yes" ]; then
       docker push ${STACK_NAMESPACE}/fragalysis-stack:latest;
       fi
-
   - stage: build
     name: Tagged Container
     script:
     - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
     if: tag IS present AND env(PUBLISH_IMAGES) = yes
-
   # Jobs that run after the main (latest and tagged) builds...
-
   - stage: build stable
     name: Stable Container
     script:
     - docker pull ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
     - docker tag ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} ${STACK_NAMESPACE}/fragalysis-stack:stable
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:stable
-
   - stage: trigger awx staging
     name: Trigger AWX Staging
     script: ./trigger-awx-tag.sh latest stack_image_tag "Staging Fragalysis Stack (Version Change)"
-
   - stage: trigger awx production
     name: Trigger AWX Production
     script: ./trigger-awx-tag.sh ${TRAVIS_TAG} stack_image_tag "Production Fragalysis Stack (Version Change)"
+  - stage: trigger awx developer
+    name: Trigger AWX Developer
+    script: ./trigger-awx-tag.sh latest stack_image_tag "${AWX_DEV_JOB_NAME}"
+    
