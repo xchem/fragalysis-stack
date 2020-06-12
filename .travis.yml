@@ -134,4 +134,5 @@ jobs:
   - stage: trigger awx developer
     name: Trigger AWX Developer
     script: ./trigger-awx-tag.sh latest stack_image_tag "${AWX_DEV_JOB_NAME}"
-    
+notifications:
+  slack: fragalysis:a6ADA8gLyx8tpHQfyzucMB8B    
