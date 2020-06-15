@@ -17,6 +17,10 @@
 #                   image (which is 'xchem')
 # BE_IMAGE_TAG      To over-ride the default tag of the source backend
 #                   (which is 'latest')
+# FE_GIT_PROJECT            To over-ride the default namespace of the fromt-end
+#                           that is cloned into the stack (which is 'xchem')
+# FE_GIT_PROJECT_BRANCH     To over-ride the default branch of the fromt-end
+#                           (which is 'master')
 # STACK_NAMESPACE   To over-ride the default namespace of the produced
 #                   stack container image (which is 'xchem')
 #
@@ -72,6 +76,8 @@ before_install:
 # If they're not defined then apply sensible defaults.
 - export BE_NAMESPACE=${BE_NAMESPACE:-xchem}
 - export BE_IMAGE_TAG=${BE_IMAGE_TAG:-latest}
+- export FE_GIT_PROJECT=${FE_GIT_PROJECT:-xchem}
+- export FE_GIT_PROJECT_BRANCH=${FE_GIT_PROJECT_BRANCH:-master}
 - export STACK_NAMESPACE=${STACK_NAMESPACE:-xchem}
 
 install:
@@ -101,7 +107,7 @@ jobs:
   - stage: build
     name: Test and Latest Container
     script:
-    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} .
+    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:latest --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} --build-arg FE_GIT_PROJECT=${FE_GIT_PROJECT} --build-arg FE_GIT_PROJECT_BRANCH=${FE_GIT_PROJECT_BRANCH} .
     - docker-compose -f docker-compose.test.yml up --build --exit-code-from tests --abort-on-container-exit
     - if [ ${PUBLISH_IMAGES} == "yes" ]; then
       docker push ${STACK_NAMESPACE}/fragalysis-stack:latest;
@@ -110,7 +116,7 @@ jobs:
   - stage: build
     name: Tagged Container
     script:
-    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} .
+    - docker build -t ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG} --build-arg BE_NAMESPACE=${BE_NAMESPACE} --build-arg BE_IMAGE_TAG=${BE_IMAGE_TAG} --build-arg FE_GIT_PROJECT=${FE_GIT_PROJECT} --build-arg FE_GIT_PROJECT_BRANCH=${FE_GIT_PROJECT_BRANCH} .
     - docker push ${STACK_NAMESPACE}/fragalysis-stack:${TRAVIS_TAG}
     if: tag IS present AND env(PUBLISH_IMAGES) = yes
 
