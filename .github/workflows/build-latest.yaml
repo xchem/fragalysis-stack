@@ -59,7 +59,7 @@ env:
   # The values set here are used unless a matching secret is found.
   # Secrets are the way users dynamically control the behaviour of this Action.
   #
-  #   For Jobs conditional on the presence of a secret see this Gist
+  #   For Jobs conditional on the presence of a secret see this Gist...
   #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
   BE_IMAGE_TAG: latest
   BE_NAMESPACE: xchem
@@ -136,8 +136,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Push
       if: steps.vars.outputs.push
-      run: |
-        echo PUSH ${{ steps.vars.outputs.STACK_NAMESPACE }}
+      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:latest
 
   deploy:
     needs: build-latest
