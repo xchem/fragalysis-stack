@@ -12,8 +12,13 @@ services:
     ports:
     - "5432:5432"
   tests:
-    image: ${STACK_NAMESPACE}/fragalysis-stack:latest
-    command: ["/code/wait-for-it.sh", "database:5432", "--", "/bin/bash", "/code/test_entry.sh"]
+    image: ${STACK_NAMESPACE:-xchem}/fragalysis-stack:${STACK_TAG:-latest}
+    command:
+    - /code/wait-for-it.sh
+    - database:5432
+    - --
+    - /bin/bash
+    - /code/test_entry.sh
     volumes:
     - ../logs:/code/logs/
     - ../media:/code/media/

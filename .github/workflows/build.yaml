@@ -81,6 +81,7 @@ jobs:
       deploy: ${{ steps.vars.outputs.deploy }}
       production-tag: ${{ steps.vars.outputs.production-tag }}
       push: ${{ steps.vars.outputs.push }}
+      tag: ${{ steps.vars.outputs.tag }}
     steps:
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -120,6 +121,12 @@ jobs:
         echo set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
         echo ::set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
 
+        # What image tag are we using? 'latest' (if not tagged) or a GitHub tag?
+        TAG="latest"
+        if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then TAG="${{ env.GITHUB_REF_SLUG }}"; fi
+        echo set-output name=tag::${TAG}
+        echo ::set-output name=tag::${TAG}
+
         # Do we push, i.e. is DOCKERHUB_USERNAME defined?
         echo set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
         echo ::set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
@@ -136,14 +143,19 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v2
+
     - name: Build
       uses: docker/build-push-action@v2
       with:
-        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:latest
+        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
     - name: Test
-      run: docker-compose -f docker-compose.test.yml up --exit-code-from tests --abort-on-container-exit
+      run: >
+        docker-compose -f docker-compose.test.yml up
+        --exit-code-from tests
+        --abort-on-container-exit
       env:
         STACK_NAMESPACE: ${{ steps.vars.outputs.STACK_NAMESPACE }}
+        STACK_TAG: ${{ steps.vars.outputs.tag }}
     - name: Login to DockerHub
       if: steps.vars.outputs.push
       uses: docker/login-action@v1
@@ -151,8 +163,8 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Push
-      if: steps.vars.outputs.push
-      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:latest
+      if: steps.vars.outputs.push == 'true'
+      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
     needs: build
@@ -170,7 +182,7 @@ jobs:
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
-        template-var-value: latest
+        template-var-value: ${{ steps.vars.outputs.tag }}
 
   deploy-production:
     needs: build
@@ -181,8 +193,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
     steps:
-    - name: Inject slug/short variables
-      uses: rlespinasse/github-slug-action@v3.x
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
@@ -191,4 +201,4 @@ jobs:
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
-        template-var-value: ${{ env.GITHUB_REF_SLUG }}
+        template-var-value: ${{ steps.vars.outputs.tag }}
