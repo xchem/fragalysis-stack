@@ -181,6 +181,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
     steps:
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v3.x
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
@@ -189,4 +191,4 @@ jobs:
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
-        template-var-value: latest
+        template-var-value: ${{ env.GITHUB_REF_SLUG }}
