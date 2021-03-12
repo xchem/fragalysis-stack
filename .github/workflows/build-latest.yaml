@@ -134,7 +134,9 @@ jobs:
 
   deploy:
     needs: build-latest
-    if: needs.build-latest.outputs.push && needs.build-latest.outputs.deploy
+    if: |
+      needs.build-latest.outputs.push == 'true' &&
+      needs.build-latest.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-staging
     steps:
