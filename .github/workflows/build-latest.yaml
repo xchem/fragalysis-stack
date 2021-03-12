@@ -18,31 +18,31 @@ name: build latest
 # have the following GitHub 'Repository Secrets' defined
 # (i.e. via 'Settings -> Secrets'): -
 #
-# BE_IMAGE_TAG        optional - default latest
-# BE_NAMESPACE        optional - default xchem
-# FE_BRANCH           optional - default master
-# FE_NAMESPACE        optional - default xchem
-# STACK_NAMESPACE     optional - default xchem
+# BE_IMAGE_TAG            optional - default latest
+# BE_NAMESPACE            optional - default xchem
+# FE_BRANCH               optional - default master
+# FE_NAMESPACE            optional - default xchem
+# STACK_NAMESPACE         optional - default xchem
 #
-# DOCKERHUB_USERNAME  optional
-# DOCKERHUB_TOKEN     optional - required if DOCKERHUB_USERNAME
+# DOCKERHUB_USERNAME      optional
+# DOCKERHUB_TOKEN         optional - required if DOCKERHUB_USERNAME
 #
-# TRIGGER_AWX         optional - set to 'yes' to deploy via AWX
-#                                you'll also need to set a repository environment
+# TRIGGER_AWX             optional - set to 'yes' to deploy via AWX
+#                                    you also need to set a repository environment
 #
 # -----------
 # Environment (GitHub Environments)
 # -----------
 #
-# Environment         awx/fragalysis-staging
+# Environment             awx/fragalysis-staging
 #
 # For automated deployment we expect the following in the environment: -
 #
-# AWX_HOST            The fully-qualified URL to AWX.
-#                     If not set, AWX triggering does not take place.
-# AWX_USER            The username of someone that can execute the AWX Job.
-# AWX_USER_PASSWORD   The user's password.
-# AWX_TEMPLATE        The AWX Job Template name to execute.
+# AWX_HOST                The fully-qualified URL to AWX.
+#                         If not set, AWX triggering does not take place.
+# AWX_USER                The username of someone that can execute the AWX Job.
+# AWX_USER_PASSWORD       The user's password.
+# AWX_TEMPLATE            The AWX Job Template name to execute.
 
 on:
   push:
@@ -71,8 +71,8 @@ jobs:
   build-latest:
     runs-on: ubuntu-latest
     outputs:
-      push: ${{ steps.vars.outputs.push }}
       deploy: ${{ steps.vars.outputs.deploy }}
+      push: ${{ steps.vars.outputs.push }}
     steps:
     - name: Initialise workflow variables
       id: vars
