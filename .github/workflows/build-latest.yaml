@@ -5,6 +5,10 @@ name: build latest
 # Here every commit is built, tagged as 'latest' and tested.
 # If a DOCKERHUB_USERNAME secret is defined the image is pushed.
 # If a TRIGGER_AWX secret is defined the image is deployed to Kubernetes.
+#
+# Actions also run on a schedule - the the container is built, tested,
+# pushed and deployed (if the relevant secrets are set) based on
+# a defined schedule.
 
 # ---------------
 # Control secrets
@@ -14,17 +18,17 @@ name: build latest
 # have the following GitHub 'Repository Secrets' defined
 # (i.e. via 'Settings -> Secrets'): -
 #
-# BE_IMAGE_TAG        (optional - default latest)
-# BE_NAMESPACE        (optional - default xchem)
-# FE_BRANCH           (optional - default master)
-# FE_NAMESPACE        (optional - default xchem)
-# STACK_NAMESPACE     (optional - default xchem)
+# BE_IMAGE_TAG        optional - default latest
+# BE_NAMESPACE        optional - default xchem
+# FE_BRANCH           optional - default master
+# FE_NAMESPACE        optional - default xchem
+# STACK_NAMESPACE     optional - default xchem
 #
-# DOCKERHUB_USERNAME  (optional)
-# DOCKERHUB_TOKEN     (optional, required if DOCKERHUB_USERNAME)
+# DOCKERHUB_USERNAME  optional
+# DOCKERHUB_TOKEN     optional - required if DOCKERHUB_USERNAME
 #
-# TRIGGER_AWX         (optional - set to 'yes' to deploy via AWX)
-#                     (           you'll also need to set a repository environment)
+# TRIGGER_AWX         optional - set to 'yes' to deploy via AWX
+#                                you'll also need to set a repository environment
 #
 # -----------
 # Environment (GitHub Environments)
@@ -45,6 +49,9 @@ on:
     branches:
     - 'master'
     - 'main'
+  schedule:
+  # Build every Sunday (0) at 4:45pm
+  - cron: '45 16 * * 0'
 
 env:
   # The following 'defaults' are used in the 'Initialise workflow variables' step,
@@ -116,11 +123,11 @@ jobs:
     - name: Build
       uses: docker/build-push-action@v2
       with:
-        tags: xchem/fragalysis-stack:latest
+        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:latest
     - name: Test
       run: docker-compose -f docker-compose.test.yml up --exit-code-from tests --abort-on-container-exit
       env:
-        STACK_NAMESPACE: ${{ steps.vars.outputs.BE_NAMESPACE }}
+        STACK_NAMESPACE: ${{ steps.vars.outputs.STACK_NAMESPACE }}
     - name: Login to DockerHub
       if: steps.vars.outputs.push
       uses: docker/login-action@v1
@@ -130,7 +137,7 @@ jobs:
     - name: Push
       if: steps.vars.outputs.push
       run: |
-        echo "PUSH"
+        echo PUSH ${{ steps.vars.outputs.STACK_NAMESPACE }}
 
   deploy:
     needs: build-latest
