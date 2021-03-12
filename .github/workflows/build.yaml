@@ -1,10 +1,14 @@
 ---
-name: build latest
+name: build
 
 # Actions that take place after every commit the master/main branch.
 # Here every commit is built, tagged as 'latest' and tested.
 # If a DOCKERHUB_USERNAME secret is defined the image is pushed.
 # If a TRIGGER_AWX secret is defined the image is deployed to Kubernetes.
+#
+# Actions also run if the repository is tagged.defaults:
+# Every tag is deployed to staging and every production-grade tag
+# (of the form N.N.N) is deployed to production.defaults:
 #
 # Actions also run on a schedule - the the container is built, tested,
 # pushed and deployed (if the relevant secrets are set) based on
@@ -35,6 +39,7 @@ name: build latest
 # -----------
 #
 # Environment             awx/fragalysis-staging
+# Environment             awx/fragalysis-production
 #
 # For automated deployment we expect the following in the environment: -
 #
@@ -49,6 +54,8 @@ on:
     branches:
     - 'master'
     - 'main'
+    tags:
+    - '**'
   schedule:
   # Build every Sunday (0) at 4:45pm
   - cron: '45 16 * * 0'
@@ -68,12 +75,15 @@ env:
   STACK_NAMESPACE: xchem
 
 jobs:
-  build-latest:
+  build:
     runs-on: ubuntu-latest
     outputs:
       deploy: ${{ steps.vars.outputs.deploy }}
+      production-tag: ${{ steps.vars.outputs.production-tag }}
       push: ${{ steps.vars.outputs.push }}
     steps:
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v3.x
     - name: Initialise workflow variables
       id: vars
       env:
@@ -82,31 +92,31 @@ jobs:
       run: |
         # BE_NAMESPACE
         BE_NAMESPACE="${{ env.BE_NAMESPACE }}"
-        if [ -n "${{ secrets.BE_NAMESPACE }}" ]; then BE_NAMESPACE="${{ secrets.BE_NAMESPACE }}" ; fi
+        if [ -n "${{ secrets.BE_NAMESPACE }}" ]; then BE_NAMESPACE="${{ secrets.BE_NAMESPACE }}"; fi
         echo set-output name=BE_NAMESPACE::${BE_NAMESPACE}
         echo ::set-output name=BE_NAMESPACE::${BE_NAMESPACE}
 
         # BE_IMAGE_TAG
         BE_IMAGE_TAG="${{ env.BE_IMAGE_TAG }}"
-        if [ -n "${{ secrets.BE_IMAGE_TAG }}" ]; then BE_IMAGE_TAG="${{ secrets.BE_IMAGE_TAG }}" ; fi
+        if [ -n "${{ secrets.BE_IMAGE_TAG }}" ]; then BE_IMAGE_TAG="${{ secrets.BE_IMAGE_TAG }}"; fi
         echo set-output name=BE_IMAGE_TAG::${BE_IMAGE_TAG}
         echo ::set-output name=BE_IMAGE_TAG::${BE_IMAGE_TAG}
 
         # FE_NAMESPACE
         FE_NAMESPACE="${{ env.FE_NAMESPACE }}"
-        if [ -n "${{ secrets.FE_NAMESPACE }}" ]; then FE_NAMESPACE="${{ secrets.FE_NAMESPACE }}" ; fi
+        if [ -n "${{ secrets.FE_NAMESPACE }}" ]; then FE_NAMESPACE="${{ secrets.FE_NAMESPACE }}"; fi
         echo set-output name=FE_NAMESPACE::${FE_NAMESPACE}
         echo ::set-output name=FE_NAMESPACE::${FE_NAMESPACE}
 
         # FE_BRANCH
         FE_BRANCH="${{ env.FE_BRANCH }}"
-        if [ -n "${{ secrets.FE_BRANCH }}" ]; then FE_BRANCH="${{ secrets.FE_BRANCH }}" ; fi
+        if [ -n "${{ secrets.FE_BRANCH }}" ]; then FE_BRANCH="${{ secrets.FE_BRANCH }}"; fi
         echo set-output name=FE_BRANCH::${FE_BRANCH}
         echo ::set-output name=FE_BRANCH::${FE_BRANCH}
 
         # STACK_NAMESPACE
         STACK_NAMESPACE="${{ env.STACK_NAMESPACE }}"
-        if [ -n "${{ secrets.STACK_NAMESPACE }}" ]; then STACK_NAMESPACE="${{ secrets.STACK_NAMESPACE }}" ; fi
+        if [ -n "${{ secrets.STACK_NAMESPACE }}" ]; then STACK_NAMESPACE="${{ secrets.STACK_NAMESPACE }}"; fi
         echo set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
         echo ::set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
 
@@ -117,6 +127,12 @@ jobs:
         # Do we deploy, i.e. is TRIGGER_AWX 'yes'?
         echo set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
         echo ::set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
+
+        # Do we deploy to production, i.e. is there a TAG of the form N.N.N?
+        HAS_PRODUCTION_TAG=false
+        if [[ ${{ env.GITHUB_REF_SLUG }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then HAS_PRODUCTION_TAG=true; fi
+        echo set-output name=production-tag::${HAS_PRODUCTION_TAG}
+        echo ::set-output name=production-tag::${HAS_PRODUCTION_TAG}
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -138,15 +154,34 @@ jobs:
       if: steps.vars.outputs.push
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:latest
 
-  deploy:
-    needs: build-latest
+  deploy-staging:
+    needs: build
     if: |
-      needs.build-latest.outputs.push == 'true' &&
-      needs.build-latest.outputs.deploy == 'true'
+      needs.build.outputs.push == 'true' &&
+      needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-staging
     steps:
     - name: Deploy staging
+      uses: informaticsmatters/trigger-awx-action@v1
+      with:
+        template: ${{ secrets.AWX_TEMPLATE }}
+        template-host: ${{ secrets.AWX_HOST }}
+        template-user: ${{ secrets.AWX_USER }}
+        template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
+        template-var: stack_image_tag
+        template-var-value: latest
+
+  deploy-production:
+    needs: build
+    if: |
+      needs.build.outputs.push == 'true' &&
+      needs.build.outputs.deploy == 'true' &&
+      needs.build.outputs.production-tag == 'true'
+    runs-on: ubuntu-latest
+    environment: awx/fragalysis-production
+    steps:
+    - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
         template: ${{ secrets.AWX_TEMPLATE }}
