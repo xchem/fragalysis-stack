@@ -1,0 +1,149 @@
+---
+name: build latest
+
+# Actions that take place after every commit the master/main branch.
+# Here every commit is built, tagged as 'latest' and tested.
+# If a DOCKERHUB_USERNAME secret is defined the image is pushed.
+# If a TRIGGER_AWX secret is defined the image is deployed to Kubernetes.
+
+# ---------------
+# Control secrets
+# ---------------
+#
+# At the GitHub 'organisation' or 'project' level you are expected to
+# have the following GitHub 'Repository Secrets' defined
+# (i.e. via 'Settings -> Secrets'): -
+#
+# BE_IMAGE_TAG        (optional - default latest)
+# BE_NAMESPACE        (optional - default xchem)
+# FE_BRANCH           (optional - default master)
+# FE_NAMESPACE        (optional - default xchem)
+# STACK_NAMESPACE     (optional - default xchem)
+#
+# DOCKERHUB_USERNAME  (optional)
+# DOCKERHUB_TOKEN     (optional, required if DOCKERHUB_USERNAME)
+#
+# TRIGGER_AWX         (optional - set to 'yes' to deploy via AWX)
+#                     (           you'll also need to set a repository environment)
+#
+# -----------
+# Environment (GitHub Environments)
+# -----------
+#
+# Environment         awx/fragalysis-staging
+#
+# For automated deployment we expect the following in the environment: -
+#
+# AWX_HOST            The fully-qualified URL to AWX.
+#                     If not set, AWX triggering does not take place.
+# AWX_USER            The username of someone that can execute the AWX Job.
+# AWX_USER_PASSWORD   The user's password.
+# AWX_TEMPLATE        The AWX Job Template name to execute.
+
+on:
+  push:
+    branches:
+    - 'master'
+    - 'main'
+
+env:
+  # The following 'defaults' are used in the 'Initialise workflow variables' step,
+  # which creates 'outputs' for use in steps and jobs that follow it.
+  # The values set here are used unless a matching secret is found.
+  # Secrets are the way users dynamically control the behaviour of this Action.
+  #
+  #   For Jobs conditional on the presence of a secret see this Gist
+  #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
+  BE_IMAGE_TAG: latest
+  BE_NAMESPACE: xchem
+  FE_BRANCH: master
+  FE_NAMESPACE: xchem
+  STACK_NAMESPACE: xchem
+
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    outputs:
+      push: ${{ steps.vars.outputs.push }}
+      deploy: ${{ steps.vars.outputs.deploy }}
+    steps:
+    - name: Initialise workflow variables
+      id: vars
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        TRIGGER_AWX: ${{ secrets.TRIGGER_AWX }}
+      run: |
+        # BE_NAMESPACE
+        BE_NAMESPACE="${{ env.BE_NAMESPACE }}"
+        if [ -n "${{ secrets.BE_NAMESPACE }}" ]; then BE_NAMESPACE="${{ secrets.BE_NAMESPACE }}" ; fi
+        echo set-output name=BE_NAMESPACE::${BE_NAMESPACE}
+        echo ::set-output name=BE_NAMESPACE::${BE_NAMESPACE}
+
+        # BE_IMAGE_TAG
+        BE_IMAGE_TAG="${{ env.BE_IMAGE_TAG }}"
+        if [ -n "${{ secrets.BE_IMAGE_TAG }}" ]; then BE_IMAGE_TAG="${{ secrets.BE_IMAGE_TAG }}" ; fi
+        echo set-output name=BE_IMAGE_TAG::${BE_IMAGE_TAG}
+        echo ::set-output name=BE_IMAGE_TAG::${BE_IMAGE_TAG}
+
+        # FE_NAMESPACE
+        FE_NAMESPACE="${{ env.FE_NAMESPACE }}"
+        if [ -n "${{ secrets.FE_NAMESPACE }}" ]; then FE_NAMESPACE="${{ secrets.FE_NAMESPACE }}" ; fi
+        echo set-output name=FE_NAMESPACE::${FE_NAMESPACE}
+        echo ::set-output name=FE_NAMESPACE::${FE_NAMESPACE}
+
+        # FE_BRANCH
+        FE_BRANCH="${{ env.FE_BRANCH }}"
+        if [ -n "${{ secrets.FE_BRANCH }}" ]; then FE_BRANCH="${{ secrets.FE_BRANCH }}" ; fi
+        echo set-output name=FE_BRANCH::${FE_BRANCH}
+        echo ::set-output name=FE_BRANCH::${FE_BRANCH}
+
+        # STACK_NAMESPACE
+        STACK_NAMESPACE="${{ env.STACK_NAMESPACE }}"
+        if [ -n "${{ secrets.STACK_NAMESPACE }}" ]; then STACK_NAMESPACE="${{ secrets.STACK_NAMESPACE }}" ; fi
+        echo set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
+        echo ::set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
+
+        # Do we push, i.e. is DOCKERHUB_USERNAME defined?
+        echo set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
+        echo ::set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
+
+        # Do we deploy, i.e. is TRIGGER_AWX 'yes'?
+        echo set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
+        echo ::set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
+
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      uses: docker/build-push-action@v2
+      with:
+        tags: xchem/fragalysis-stack:latest
+    - name: Test
+      run: docker-compose -f docker-compose.test.yml up --exit-code-from tests --abort-on-container-exit
+      env:
+        STACK_NAMESPACE: ${{ steps.vars.outputs.BE_NAMESPACE }}
+    - name: Login to DockerHub
+      if: steps.vars.outputs.push
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Push
+      if: steps.vars.outputs.push
+      run: |
+        echo "PUSH"
+
+  deploy:
+    needs: build-latest
+    if: needs.build-latest.outputs.push && needs.build-latest.outputs.deploy
+    runs-on: ubuntu-latest
+    environment: awx/fragalysis-staging
+    steps:
+    - name: Deploy staging
+      uses: informaticsmatters/trigger-awx-action@v1
+      with:
+        template: ${{ secrets.AWX_TEMPLATE }}
+        template-host: ${{ secrets.AWX_HOST }}
+        template-user: ${{ secrets.AWX_USER }}
+        template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
+        template-var: stack_image_tag
+        template-var-value: latest
