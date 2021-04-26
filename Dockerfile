@@ -1,6 +1,8 @@
 ARG BE_NAMESPACE=xchem
 ARG BE_IMAGE_TAG=latest
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
+LABEL BE_NAMESPACE=${BE_NAMESPACE}
+LABEL BE_IMAGE_TAG=${BE_IMAGE_TAG}
 
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
@@ -21,6 +23,8 @@ RUN apt-get install -y nodejs
 # but it can be redirected with a couple of build-args.
 ARG FE_NAMESPACE=xchem
 ARG FE_BRANCH=master
+LABEL FE_NAMESPACE=${FE_NAMESPACE}
+LABEL FE_BRANCH=${FE_BRANCH}
 RUN git clone https://github.com/${FE_NAMESPACE}/fragalysis-frontend ${APP_ROOT}/frontend
 RUN cd ${APP_ROOT}/frontend && git checkout ${FE_BRANCH}
 
@@ -42,13 +46,6 @@ RUN chown -R ${APP_USER_ID} ${APP_ROOT} /run /var
 
 ADD LICENSE /LICENSE
 ADD README.md /README.md
-
-# Build provenance.
-# Add labels for the build arguments...
-LABEL BE_NAMESPACE=${BE_NAMESPACE}
-LABEL BE_IMAGE_TAG=${BE_IMAGE_TAG}
-LABEL FE_NAMESPACE=${FE_NAMESPACE}
-LABEL FE_BRANCH=${FE_BRANCH}
 
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]
