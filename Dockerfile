@@ -1,5 +1,5 @@
-ARG BE_NAMESPACE="xchem"
-ARG BE_IMAGE_TAG="latest"
+ARG BE_NAMESPACE=xchem
+ARG BE_IMAGE_TAG=latest
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 ENV APP_ROOT /code
@@ -45,10 +45,10 @@ ADD README.md /README.md
 
 # Build provenance.
 # Add labels for the build arguments...
-LABEL BE_NAMESPACE=${BE_NAMESPACE} \
-      BE_IMAGE_TAG=${BE_IMAGE_TAG} \
-      FE_NAMESPACE=${FE_NAMESPACE} \
-      FE_BRANCH=${FE_BRANCH}
+LABEL BE_NAMESPACE=${BE_NAMESPACE}
+LABEL BE_IMAGE_TAG=${BE_IMAGE_TAG}
+LABEL FE_NAMESPACE=${FE_NAMESPACE}
+LABEL FE_BRANCH=${FE_BRANCH}
 
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]
