@@ -43,5 +43,12 @@ RUN chown -R ${APP_USER_ID} ${APP_ROOT} /run /var
 ADD LICENSE /LICENSE
 ADD README.md /README.md
 
+# Build provenance.
+# Add labels for the build arguments...
+LABEL BE_NAMESPACE=${BE_NAMESPACE} \
+      BE_IMAGE_TAG=${BE_IMAGE_TAG} \
+      FE_NAMESPACE=${FE_NAMESPACE} \
+      FE_BRANCH=${FE_BRANCH}
+
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]
