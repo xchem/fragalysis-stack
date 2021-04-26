@@ -1,6 +1,8 @@
 ARG BE_NAMESPACE=xchem
 ARG BE_IMAGE_TAG=latest
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
+ENV BE_NAMESPACE ${BE_NAMESPACE}
+ENV BE_IMAGE_TAG ${BE_IMAGE_TAG}
 LABEL BE_NAMESPACE=${BE_NAMESPACE}
 LABEL BE_IMAGE_TAG=${BE_IMAGE_TAG}
 
@@ -23,6 +25,8 @@ RUN apt-get install -y nodejs
 # but it can be redirected with a couple of build-args.
 ARG FE_NAMESPACE=xchem
 ARG FE_BRANCH=master
+ENV FE_NAMESPACE ${FE_NAMESPACE}
+ENV FE_BRANCH ${FE_BRANCH}
 LABEL FE_NAMESPACE=${FE_NAMESPACE}
 LABEL FE_BRANCH=${FE_BRANCH}
 RUN git clone https://github.com/${FE_NAMESPACE}/fragalysis-frontend ${APP_ROOT}/frontend
