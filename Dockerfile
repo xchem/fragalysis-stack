@@ -6,6 +6,9 @@ ENV BE_IMAGE_TAG ${BE_IMAGE_TAG}
 LABEL BE_NAMESPACE=${BE_NAMESPACE}
 LABEL BE_IMAGE_TAG=${BE_IMAGE_TAG}
 
+RUN echo BE_NAMESPACE=${BE_NAMESPACE}
+RUN echo BE_IMAGE_TAG=${BE_NAMESPACE}
+
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
 RUN useradd -c 'Container user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag

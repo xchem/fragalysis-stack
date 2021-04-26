@@ -170,6 +170,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
+    - name: Display build args
+      run: |
+        echo BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
+        echo BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
+        echo FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
+        echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
     - name: Build
       uses: docker/build-push-action@v2
       with:
