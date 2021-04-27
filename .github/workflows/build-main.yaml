@@ -98,7 +98,7 @@ env:
   STACK_NAMESPACE: xchem
   # Common slack notification variables.
   # Used in the rtCamp/action-slack-notify Action.
-  SLACK_USERNAME: github-workflow
+  SLACK_USERNAME: GitHub Action
   SLACK_ICON: https://github.com/InformaticsMatters/dls-fragalysis-stack-kubernetes/raw/master/icons/094-robot-face-3-512.png?size=48
 
 jobs:
