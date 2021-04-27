@@ -96,6 +96,8 @@ env:
   FE_BRANCH: master
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
+  AWX_PRODUCTION_TEMPLATE: Production Fragalysis Stack (Version Change)
+  AWX_STAGING_TEMPLATE: Staging Fragalysis Stack (Version Change)
   # Common slack notification variables.
   # Used in the rtCamp/action-slack-notify Action.
   SLACK_USERNAME: ActionBot
@@ -232,7 +234,7 @@ jobs:
     - name: Deploy staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: ${{ secrets.AWX_TEMPLATE }}
+        template: ${{ env.AWX_STAGING_TEMPLATE }}
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
@@ -258,7 +260,7 @@ jobs:
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: ${{ secrets.AWX_TEMPLATE }}
+        template: ${{ env.AWX_PRODUCTION_TEMPLATE }}
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
