@@ -36,6 +36,8 @@ name: build main
 # TRIGGER_AWX             optional - set to 'yes' to deploy via AWX
 #                                    you also need to set a repository environment
 #
+# SLACK_NOTIFY_WEBHOOK    optional - required for Slack notifications
+#
 # -----------
 # Environment (GitHub Environments)
 # -----------
@@ -110,6 +112,7 @@ jobs:
       id: vars
       env:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        SLACK_NOTIFY_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         TRIGGER_AWX: ${{ secrets.TRIGGER_AWX }}
       run: |
         # BE_NAMESPACE
@@ -167,6 +170,10 @@ jobs:
         echo set-output name=production-tag::${HAS_PRODUCTION_TAG}
         echo ::set-output name=production-tag::${HAS_PRODUCTION_TAG}
 
+        # Do we send Slack notifications, i.e. is SLACK_NOTIFY_WEBHOOK defined?
+        echo set-output name=notify::${{ env.SLACK_NOTIFY_WEBHOOK != '' }}
+        echo ::set-output name=notify::${{ env.SLACK_NOTIFY_WEBHOOK != '' }}
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -202,6 +209,11 @@ jobs:
     - name: Push
       if: steps.vars.outputs.push == 'true'
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
+    - name: Notify build
+      if: steps.vars.outputs.notify == 'true'
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
 
   deploy-staging:
     needs: build
@@ -220,6 +232,13 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ steps.vars.outputs.tag }}
+    - name: Notify staging deployment
+      if: steps.vars.outputs.notify == 'true'
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
+        SLACK_TITLE: Deployed
+        SLACK_MESSAGE: Deployed to awx/fragalysis-staging
 
   deploy-production:
     needs: build
@@ -239,3 +258,10 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ steps.vars.outputs.tag }}
+    - name: Notify production deployment
+      if: steps.vars.outputs.notify == 'true'
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
+        SLACK_TITLE: Deployed
+        SLACK_MESSAGE: Deployed to awx/fragalysis-production
