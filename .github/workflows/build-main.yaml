@@ -51,7 +51,6 @@ name: build main
 #                         If not set, AWX triggering does not take place.
 # AWX_USER                The username of someone that can execute the AWX Job.
 # AWX_USER_PASSWORD       The user's password.
-# AWX_TEMPLATE            The AWX Job Template name to execute.
 
 on:
   push:
