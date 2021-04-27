@@ -96,6 +96,8 @@ env:
   FE_BRANCH: master
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
+  # Slack notification icon
+  SLACK_ICON: https://github.com/alanbchristie.png?size=48
 
 jobs:
   build:
@@ -215,7 +217,7 @@ jobs:
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         SLACK_TITLE: Build Complete
-        SLACK_MESSAGE: Built image fragalysis-stack:${{ steps.vars.outputs.tag }}
+        SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
     needs: build
