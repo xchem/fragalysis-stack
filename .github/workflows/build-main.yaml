@@ -112,6 +112,8 @@ jobs:
     steps:
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
+    - name: Display github.ref
+      run: echo "${{ github.ref }}"
     - name: Initialise workflow variables
       id: vars
       env:
