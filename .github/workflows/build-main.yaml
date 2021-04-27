@@ -214,6 +214,8 @@ jobs:
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
+        SLACK_TITLE: Build Complete
+        SLACK_MESSAGE: Built image fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
     needs: build
@@ -237,7 +239,7 @@ jobs:
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployed
+        SLACK_TITLE: Deployment Complete
         SLACK_MESSAGE: Deployed to awx/fragalysis-staging
 
   deploy-production:
@@ -263,5 +265,5 @@ jobs:
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployed
+        SLACK_TITLE: Deployment Complete
         SLACK_MESSAGE: Deployed to awx/fragalysis-production
