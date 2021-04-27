@@ -96,9 +96,10 @@ env:
   FE_BRANCH: master
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
-  # Common slack notification variables
+  # Common slack notification variables.
+  # Used in the rtCamp/action-slack-notify Action.
   SLACK_USERNAME: github-workflow
-  SLACK_ICON_EMOJI: ':robot:'
+  SLACK_ICON: https://github.com/InformaticsMatters/dls-fragalysis-stack-kubernetes/raw/master/icons/094-robot-face-3-512.png?size=48
 
 jobs:
   build:
