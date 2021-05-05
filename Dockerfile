@@ -1,5 +1,5 @@
-ARG BE_NAMESPACE="xchem"
-ARG BE_IMAGE_TAG="latest"
+ARG BE_NAMESPACE=xchem
+ARG BE_IMAGE_TAG=latest
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 ENV APP_ROOT /code
