@@ -33,8 +33,14 @@ name: build main
 # DOCKERHUB_USERNAME      optional
 # DOCKERHUB_TOKEN         optional - required if DOCKERHUB_USERNAME
 #
-# TRIGGER_AWX             optional - set to 'yes' to deploy via AWX
-#                                    you also need to set a repository environment
+# TRIGGER_AWX             optional - set to 'yes' to deploy 'official' builds via AWX
+#                                    you also need to define the repository environments
+#                                    'awx/fragalysis-staging' and 'awx/fragalysis-production'.
+#                                    You should not set this and TRIGGER_DEVELOPER_AWX.
+# TRIGGER_DEVELOPER_AWX   optional - set to 'yes' to deploy a developer-specific build via AWX
+#                                    you also need to set the repository environment
+#                                    'awx/fragalysis-developer'.
+#                                    You should not set this and TRIGGER_AWX.
 #
 # SLACK_NOTIFY_WEBHOOK    optional - required for Slack notifications
 #
@@ -44,6 +50,7 @@ name: build main
 #
 # Environment             awx/fragalysis-staging
 # Environment             awx/fragalysis-production
+# Environment             awx/fragalysis-developer
 #
 # For automated deployment we expect the following in the environment: -
 #
@@ -51,6 +58,7 @@ name: build main
 #                         If not set, AWX triggering does not take place.
 # AWX_USER                The username of someone that can execute the AWX Job.
 # AWX_USER_PASSWORD       The user's password.
+# AWX_TEMPLATE_NAME       The template to run (for developer environments)
 
 on:
   push:
@@ -105,6 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deploy: ${{ steps.vars.outputs.deploy }}
+      deploy-developer: ${{ steps.vars.outputs.deploy-developer }}
       production-tag: ${{ steps.vars.outputs.production-tag }}
       push: ${{ steps.vars.outputs.push }}
       tag: ${{ steps.vars.outputs.tag }}
@@ -117,6 +126,7 @@ jobs:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         SLACK_NOTIFY_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         TRIGGER_AWX: ${{ secrets.TRIGGER_AWX }}
+        TRIGGER_DEVELOPER_AWX: ${{ secrets.TRIGGER_DEVELOPER_AWX }}
       run: |
         # BE_NAMESPACE
         BE_NAMESPACE="${{ env.BE_NAMESPACE }}"
@@ -163,9 +173,13 @@ jobs:
         echo set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
         echo ::set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
 
-        # Do we deploy, i.e. is TRIGGER_AWX 'yes'?
+        # Do we deploy official images, i.e. is TRIGGER_AWX 'yes'?
         echo set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
         echo ::set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
+
+        # Do we deploy developer images, i.e. is TRIGGER_DEVELOPER_AWX 'yes'?
+        echo set-output name=deploy-developer::${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
+        echo ::set-output name=deploy-developer::${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
 
         # Do we deploy to production, i.e. is there a TAG of the form N.N.N?
         HAS_PRODUCTION_TAG=false
@@ -221,6 +235,9 @@ jobs:
         SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
+    # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
+    # using a pre-defined AWX Job Template name
+    # and the awx/fragalysis-staging environment.
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
@@ -246,6 +263,9 @@ jobs:
         SLACK_MESSAGE: Deployed to awx/fragalysis-staging
 
   deploy-production:
+    # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
+    # using a pre-defined AWX Job Template name
+    # and the awx/fragalysis-production environment.
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
@@ -270,3 +290,24 @@ jobs:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         SLACK_TITLE: Deployment Complete
         SLACK_MESSAGE: Deployed to awx/fragalysis-production
+
+  deploy-developer:
+    # A "deploy to a developer's Fragalysis" Kubernetes Namespace
+    # using an environment-defined AWX Job Template name
+    # and the awx/fragalysis-developer environment.
+    needs: build
+    if: |
+      needs.build.outputs.push == 'true' &&
+      needs.build.outputs.deploy-developer == 'true'
+    runs-on: ubuntu-latest
+    environment: awx/fragalysis-developer
+    steps:
+    - name: Deploy developer
+      uses: informaticsmatters/trigger-awx-action@v1
+      with:
+        template: ${{ secrets.AWX_TEMPLATE_NAME }}
+        template-host: ${{ secrets.AWX_HOST }}
+        template-user: ${{ secrets.AWX_USER }}
+        template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
+        template-var: stack_image_tag
+        template-var-value: ${{ needs.build.outputs.tag }}
