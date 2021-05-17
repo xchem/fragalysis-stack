@@ -67,9 +67,6 @@ on:
     - 'main'
     tags:
     - '**'
-  schedule:
-  # Build every Sunday (0) at 4:45pm
-  - cron: '45 16 * * 0'
   # Build if triggered externally.
   # The trigger can provide a number of (optional) inputs...
   workflow_dispatch:
