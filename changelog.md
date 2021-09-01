@@ -1,4 +1,13 @@
 # Changelog (from 22/07/2021)
+
+## 01/09/2021 - version 2.5.1
+### Frontend ([PR #251](https://github.com/xchem/fragalysis-frontend/pull/251))
+➕ Update zenodo link for Mpro
+### Backend (no PR change from last release)
+:information_source: No changes included in this version.
+### Resolved tickets
+None
+
 ## 26/07/2021 - version 2.5.0 (prev. version should have been major release)
 ### Frontend ([PR #250](https://github.com/xchem/fragalysis-frontend/pull/250))
 ➕ Redirect Mpro download to zenodo (temporary fix)
