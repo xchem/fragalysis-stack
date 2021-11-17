@@ -1,5 +1,16 @@
 # Changelog (from 22/07/2021)
 
+## 17/11/2021 - version 2.6.0. 
+### Frontend ([PR #254-265](https://github.com/xchem/fragalysis-frontend/pull/265)). 
+:heavy_plus_sign: Removed sites. 
+:heavy_plus_sign: Added tag editor. 
+:heavy_plus_sign: Added tag navigator. 
+:heavy_plus_sign: Minor debugging. 
+### Backend (no PR change from last release)
+:information_source: No changes included in this version.  
+### Resolved tickets. 
+[#662](https://github.com/m2ms/fragalysis-frontend/issues/662), [#617](https://github.com/m2ms/fragalysis-frontend/issues/617), [#672](https://github.com/m2ms/fragalysis-frontend/issues/672), [#659](https://github.com/m2ms/fragalysis-frontend/issues/659), [#665](https://github.com/m2ms/fragalysis-frontend/issues/665), [#668](https://github.com/m2ms/fragalysis-frontend/issues/668), [#667](https://github.com/m2ms/fragalysis-frontend/issues/667), [#664](https://github.com/m2ms/fragalysis-frontend/issues/664), [#663](https://github.com/m2ms/fragalysis-frontend/issues/663), [#612](https://github.com/m2ms/fragalysis-frontend/issues/612), [#666](https://github.com/m2ms/fragalysis-frontend/issues/666), [#493](https://github.com/m2ms/fragalysis-frontend/issues/493), [#671](https://github.com/m2ms/fragalysis-frontend/issues/671),
+
 ## 01/09/2021 - version 2.5.1
 ### Frontend ([PR #251](https://github.com/xchem/fragalysis-frontend/pull/251))
 ➕ Update zenodo link for Mpro
