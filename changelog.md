@@ -1,5 +1,15 @@
 # Changelog (from 22/07/2021)
 
+## 2/12/2021 - version 2.6.1. 
+### Frontend ([PR #266-268](https://github.com/xchem/fragalysis-frontend/pull/266)). 
+:heavy_plus_sign: Fixed expansion vectors
+:heavy_plus_sign: Fixed display molecules with no tags
+:heavy_plus_sign: Fixed display first molecule of the tag.
+### Backend (no PR change from last release)
+:information_source: No changes included in this version.  
+### Resolved tickets. 
+[#683](https://github.com/m2ms/fragalysis-frontend/issues/683), [#693](https://github.com/m2ms/fragalysis-frontend/issues/693), [#694](https://github.com/m2ms/fragalysis-frontend/issues/694)
+
 ## 17/11/2021 - version 2.6.0. 
 ### Frontend ([PR #254-265](https://github.com/xchem/fragalysis-frontend/pull/265)). 
 :heavy_plus_sign: Removed sites. 
