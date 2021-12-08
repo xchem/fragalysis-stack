@@ -1,5 +1,16 @@
 # Changelog (from 22/07/2021)
 
+## 8/12/2021 - version 2.6.2. 
+### Frontend ([PR #269-271](https://github.com/xchem/fragalysis-frontend/pull/269)). 
+:heavy_plus_sign: Fixed select the first molecule
+:heavy_plus_sign: Fixed broken direct links
+### Backend ([PR #287-290](https://github.com/xchem/fragalysis-backend/pull/287)). 
+:heavy_plus_sign: Convert existing sites into tags for old targets
+:heavy_plus_sign: Backend work for Data Download Epic 4
+
+### Resolved tickets. 
+[#688](https://github.com/m2ms/fragalysis-frontend/issues/688), [#694](https://github.com/m2ms/fragalysis-frontend/issues/694), [#670](https://github.com/m2ms/fragalysis-frontend/issues/670), [#699](https://github.com/m2ms/fragalysis-frontend/issues/699), 
+
 ## 2/12/2021 - version 2.6.1. 
 ### Frontend ([PR #266-268](https://github.com/xchem/fragalysis-frontend/pull/266)). 
 :heavy_plus_sign: Fixed expansion vectors
