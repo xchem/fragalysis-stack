@@ -1,7 +1,17 @@
 # Changelog (from 22/07/2021)
 
+
+## 22/12/2021 - version 2.6.4. 
+### Frontend ([PR #282](https://github.com/xchem/fragalysis-frontend/pull/282)). 
+:heavy_plus_sign: Data download fix
+(no PR change from last release)
+:information_source: No changes included in this version.
+
+### Resolved tickets. 
+[#742](https://github.com/m2ms/fragalysis-frontend/issues/742), 
+
 ## 22/12/2021 - version 2.6.3. 
-### Frontend ([PR #272-282](https://github.com/xchem/fragalysis-frontend/pull/272)). 
+### Frontend ([PR #272-281](https://github.com/xchem/fragalysis-frontend/pull/272)). 
 :heavy_plus_sign: GUI improvements
 :heavy_plus_sign: Data download improvements/fixes
 :heavy_plus_sign: Tag editionr improvements
