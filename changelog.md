@@ -4,7 +4,8 @@
 ## 22/12/2021 - version 2.6.4. 
 ### Frontend ([PR #282](https://github.com/xchem/fragalysis-frontend/pull/282)). 
 :heavy_plus_sign: Data download fix
-(no PR change from last release)
+:heavy_plus_sign: Snapshopt bug fixes
+### Backend (no PR change from last release)
 :information_source: No changes included in this version.
 
 ### Resolved tickets. 
