@@ -1,6 +1,14 @@
 # Changelog (from 22/07/2021)
 
 
+## 06/01/2022 - version 2.6.5. 
+### Frontend (no PR change from last release)
+:information_source: No changes included in this version.
+### Backend ([PR #295](https://github.com/xchem/fragalysis-backend/pull/295)). 
+:heavy_plus_sign: Bug fixed: sdf download API option
+### Resolved tickets. 
+[#753](https://github.com/m2ms/fragalysis-frontend/issues/753)
+
 ## 22/12/2021 - version 2.6.4. 
 ### Frontend ([PR #282](https://github.com/xchem/fragalysis-frontend/pull/282)). 
 :heavy_plus_sign: Data download fix
@@ -9,7 +17,7 @@
 :information_source: No changes included in this version.
 
 ### Resolved tickets. 
-[#742](https://github.com/m2ms/fragalysis-frontend/issues/742), 
+[#742](https://github.com/m2ms/fragalysis-frontend/issues/742)
 
 ## 22/12/2021 - version 2.6.3. 
 ### Frontend ([PR #272-281](https://github.com/xchem/fragalysis-frontend/pull/272)). 
