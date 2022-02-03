@@ -1,6 +1,22 @@
 # Changelog (from 22/07/2021)
 
 
+## 03/02/2022 - version 2.6.6. 
+### Frontend ([PR #283,#284](https://github.com/xchem/fragalysis-frontend/pull/283)). 
+:heavy_plus_sign: Bug fixed: select/unselect hits
+:heavy_plus_sign: Bug fixed: new tags color
+:heavy_plus_sign: Bug fixed: tags assigments
+:heavy_plus_sign: Layout changes
+### Backend ([PR #297 - #303 ](https://github.com/xchem/fragalysis-backend/pull/297)). 
+:heavy_plus_sign: Upload/download consolidation
+:heavy_plus_sign: Bug fixed: broken snaphsots
+:heavy_plus_sign: Bug fixed: modals
+### Resolved tickets. 
+[#772](https://github.com/m2ms/fragalysis-frontend/issues/772), [#767](https://github.com/m2ms/fragalysis-frontend/issues/767), [#707](https://github.com/m2ms/fragalysis-frontend/issues/707), [#717](https://github.com/m2ms/fragalysis-frontend/issues/717), [#757](https://github.com/m2ms/fragalysis-frontend/issues/757), [#764](https://github.com/m2ms/fragalysis-frontend/issues/764), [#771](https://github.com/m2ms/fragalysis-frontend/issues/771), [#723](https://github.com/m2ms/fragalysis-frontend/issues/723), [#759](https://github.com/m2ms/fragalysis-frontend/issues/759), [#766](https://github.com/m2ms/fragalysis-frontend/issues/766), [#748](https://github.com/m2ms/fragalysis-frontend/issues/748)), [#739](https://github.com/m2ms/fragalysis-frontend/issues/739), [#748](https://github.com/m2ms/fragalysis-frontend/issues/748)), [#754](https://github.com/m2ms/fragalysis-frontend/issues/754), [#745](https://github.com/m2ms/fragalysis-frontend/issues/745)), [#744](https://github.com/m2ms/fragalysis-frontend/issues/744), [#783](https://github.com/m2ms/fragalysis-frontend/issues/783), [#758](https://github.com/m2ms/fragalysis-frontend/issues/758), [#761](https://github.com/m2ms/fragalysis-frontend/issues/761)
+
+
+
+
 ## 06/01/2022 - version 2.6.5. 
 ### Frontend (no PR change from last release)
 :information_source: No changes included in this version.
