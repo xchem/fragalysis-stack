@@ -1,6 +1,14 @@
 # Changelog (from 22/07/2021)
 
 
+## 04/02/2022 - version 2.6.6.1 
+### Frontend ([PR #285](https://github.com/xchem/fragalysis-frontend/pull/285)). 
+:heavy_plus_sign: Bug fixed: Layout in Tag Details
+### Backend
+:information_source: No changes included in this version.
+### Resolved tickets. 
+[#763](https://github.com/m2ms/fragalysis-frontend/issues/763)
+
 ## 03/02/2022 - version 2.6.6. 
 ### Frontend ([PR #283,#284](https://github.com/xchem/fragalysis-frontend/pull/283)). 
 :heavy_plus_sign: Bug fixed: select/unselect hits
