@@ -1,5 +1,15 @@
 # Changelog (from 22/07/2021)
 
+
+## 11/02/2022 - version 2.6.9.
+### Frontend (no PR change from last release)
+:information_source: No changes included in this version.
+
+### Backend ([PR #312](https://github.com/xchem/fragalysis-backend/pull/312)). 
+:heavy_plus_sign: Bug fixed: Better 2D rendering
+### Resolved tickets. 
+[#762](https://github.com/m2ms/fragalysis-frontend/issues/762)
+
 ## 10/02/2022 - version 2.6.8.
 ### Frontend ([PR #286](https://github.com/xchem/fragalysis-frontend/pull/286)). 
 :heavy_plus_sign: Bug fixed: Better 2D rendering
