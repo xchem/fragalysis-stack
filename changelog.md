@@ -1,6 +1,20 @@
 # Changelog (from 22/07/2021)
 
 
+
+## 02/03/2022 - version 2.6.10.
+### Frontend ([PR #287-#291](https://github.com/xchem/fragalysis-frontend/pull/287)). 
+:heavy_plus_sign: Bug fixed: Better 2D rendering
+:heavy_plus_sign: Bug fixed: Tag assigment
+:heavy_plus_sign: Bug fixed: Snapshop selected compounds.
+
+### Backend (no PR change from last release)
+:information_source: No changes included in this version.
+
+### Resolved tickets. 
+[#789](https://github.com/m2ms/fragalysis-frontend/issues/789), [#794](https://github.com/m2ms/fragalysis-frontend/issues/794), [#682](https://github.com/m2ms/fragalysis-frontend/issues/682), [#803](https://github.com/m2ms/fragalysis-frontend/issues/803), [#815](https://github.com/m2ms/fragalysis-frontend/issues/815), [#801](https://github.com/m2ms/fragalysis-frontend/issues/801), [#788](https://github.com/m2ms/fragalysis-frontend/issues/788),[#804](https://github.com/m2ms/fragalysis-frontend/issues/804)
+
+
 ## 11/02/2022 - version 2.6.9.
 ### Frontend (no PR change from last release)
 :information_source: No changes included in this version.
@@ -20,7 +34,6 @@
 :heavy_plus_sign: New feature: Self-documented zip
 ### Resolved tickets. 
 [#762](https://github.com/m2ms/fragalysis-frontend/issues/762), [#765](https://github.com/m2ms/fragalysis-frontend/issues/765), [#768](https://github.com/m2ms/fragalysis-frontend/issues/768), [#787](https://github.com/m2ms/fragalysis-frontend/issues/787), [#790](https://github.com/m2ms/fragalysis-frontend/issues/790),
-
 
 
 ## 04/02/2022 - version 2.6.7.
