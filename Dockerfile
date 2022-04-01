@@ -5,16 +5,21 @@ FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 ENV APP_ROOT /code
 ENV APP_USER_ID 2000
 RUN useradd -c 'Container user' --user-group --uid ${APP_USER_ID} --home-dir ${APP_ROOT} -s /bin/bash frag
-RUN apt-get update -y
-RUN apt-get install -y wget gnupg bzip2
+RUN apt-get update -y &&\
+  apt-get install -y wget gnupg bzip2 &&\
+  apt-get clean
 
 # Install yarn (instead of npm)
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update -y && apt-get install -y yarn
+RUN apt-get update -y && apt-get install -y yarn && apt-get clean
 
 # Install nodejs
-RUN apt-get install -y nodejs
+RUN wget -q https://nodejs.org/download/release/v12.22.11/node-v12.22.11-linux-x64.tar.gz &&\
+  mkdir -p /usr/local/lib/nodejs &&\
+  tar -xf node-v12.22.11-linux-x64.tar.gz -C /usr/local/lib/nodejs &&\
+  rm node-v12.22.11-linux-x64.tar.gz
+ENV PATH /usr/local/lib/nodejs/node-v12.22.11-linux-x64/bin:$PATH
 
 # Add in the frontend code
 # By default this is hosted on the xchem project's master branch
