@@ -1,5 +1,18 @@
 # Changelog (from 22/07/2021)
 
+## 18/05/2022 - version 2.6.11.
+### Frontend ([PR #292-#298](https://github.com/xchem/fragalysis-frontend/pull/292)). 
+:heavy_plus_sign: Protein bad atom rendering
+:heavy_plus_sign: Disclosure links relative
+:heavy_plus_sign: Bug fixed: restore button
+
+### Backend ([PR #314,#318,#319,#321](https://github.com/xchem/fragalysis-backend/pull/314)). 
+:heavy_plus_sign: Bug fixed: Debug flag
+:heavy_plus_sign: New graph network
+:heavy_plus_sign: Job launcher 1
+
+### Resolved tickets. 
+[#724](https://github.com/m2ms/fragalysis-frontend/issues/724), [#775](https://github.com/m2ms/fragalysis-frontend/issues/775), [#628](https://github.com/m2ms/fragalysis-frontend/issues/628), [#845](https://github.com/m2ms/fragalysis-frontend/issues/845)
 
 
 ## 02/03/2022 - version 2.6.10.
