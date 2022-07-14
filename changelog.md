@@ -1,5 +1,17 @@
 # Changelog (from 22/07/2021)
 
+
+## 14/07/2022 - version 2.6.12.
+### Frontend ([PR #299](https://github.com/xchem/fragalysis-frontend/pull/299)). 
+:heavy_plus_sign: Bug fixed: RHS F button crashing
+
+### Backend ([PR #325,#327,#328,#329](https://github.com/xchem/fragalysis-backend/pull/314)). 
+:heavy_plus_sign: Bug fixed: download sdf files
+:heavy_plus_sign: Crystal ids in the sdf files
+
+### Resolved tickets. 
+[#881](https://github.com/m2ms/fragalysis-frontend/issues/881), [#895](https://github.com/m2ms/fragalysis-frontend/issues/895), [#907](https://github.com/m2ms/fragalysis-frontend/issues/907), [#915](https://github.com/m2ms/fragalysis-frontend/issues/915)
+
 ## 18/05/2022 - version 2.6.11.
 ### Frontend ([PR #292-#298](https://github.com/xchem/fragalysis-frontend/pull/292)). 
 :heavy_plus_sign: Protein bad atom rendering
