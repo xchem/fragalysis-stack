@@ -1,6 +1,17 @@
 # Changelog (from 22/07/2021)
 
 
+
+## 19/07/2022 - version 2.7.0.
+### Frontend ([PR #300](https://github.com/xchem/fragalysis-frontend/pull/300)). 
+:heavy_plus_sign: New functionality: Perspectives (Customize layout)
+
+### Backend (no PR change from last release)
+:information_source: No changes included in this version.
+
+### Resolved tickets. 
+[#861](https://github.com/m2ms/fragalysis-frontend/issues/861)
+
 ## 14/07/2022 - version 2.6.12.
 ### Frontend ([PR #299](https://github.com/xchem/fragalysis-frontend/pull/299)). 
 :heavy_plus_sign: Bug fixed: RHS F button crashing
