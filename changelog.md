@@ -1,6 +1,8 @@
 # Changelog (from 22/07/2021)
 
 
+## 20/07/2022 - version 2.7.1.
+Quick fix
 
 ## 19/07/2022 - version 2.7.0.
 ### Frontend ([PR #300](https://github.com/xchem/fragalysis-frontend/pull/300)). 
