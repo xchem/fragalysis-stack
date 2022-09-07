@@ -197,6 +197,10 @@ jobs:
         echo BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
         echo FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
         echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+    - name: Set VERSION file
+      run: |
+        echo VERSION="${GITHUB_REF_NAME}"
+        echo "${GITHUB_REF_NAME}" > VERSION
     - name: Build
       uses: docker/build-push-action@v2
       with:

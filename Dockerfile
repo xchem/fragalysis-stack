@@ -45,8 +45,9 @@ RUN chmod 755 ${APP_ROOT}/launch-stack.sh
 
 RUN chown -R ${APP_USER_ID} ${APP_ROOT} /run /var
 
-ADD LICENSE /LICENSE
-ADD README.md /README.md
+COPY LICENSE /LICENSE
+COPY README.md /README.md
+COPY VERSION /VERSION
 
 WORKDIR ${APP_ROOT}
 CMD ["./docker-entrypoint.sh"]
