@@ -171,7 +171,7 @@ jobs:
         # Set a version
         VERSION="0.0.0"
         if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then VERSION="${{ env.GITHUB_REF_SLUG }}";
-        else VERSION="${{ env.GITHUB_REF_NAME }}.${{ env.GITHUB_RUN_ID }}"; fi
+        else VERSION="${{ github.ref_name }}.${{ github.run_id }}"; fi
         echo set-output name=version::${VERSION}
         echo ::set-output name=version::${VERSION}
 
