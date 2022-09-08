@@ -65,6 +65,7 @@ on:
     branches:
     - 'master'
     - 'main'
+    - '703'
     tags:
     - '**'
   # Build if triggered externally.
@@ -114,6 +115,7 @@ jobs:
       production-tag: ${{ steps.vars.outputs.production-tag }}
       push: ${{ steps.vars.outputs.push }}
       tag: ${{ steps.vars.outputs.tag }}
+      version: ${{ steps.vars.outputs.version }}
     steps:
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -166,6 +168,13 @@ jobs:
         echo set-output name=tag::${TAG}
         echo ::set-output name=tag::${TAG}
 
+        # Set a version
+        VERSION="0.0.0"
+        if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then VERSION="${{ env.GITHUB_REF_SLUG }}";
+        else VERSION="${{ github.ref_name }}.${{ github.run_number }}"; fi
+        echo set-output name=version::${VERSION}
+        echo ::set-output name=version::${VERSION}
+
         # Do we push, i.e. is DOCKERHUB_USERNAME defined?
         echo set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
         echo ::set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
@@ -197,6 +206,10 @@ jobs:
         echo BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
         echo FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
         echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+    - name: Set VERSION file
+      run: |
+        echo VERSION="${{ steps.vars.outputs.version }}"
+        echo "${{ steps.vars.outputs.version }}" > VERSION
     - name: Build
       uses: docker/build-push-action@v2
       with:
