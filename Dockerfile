@@ -1,19 +1,25 @@
 ARG BE_NAMESPACE=xchem
 ARG BE_IMAGE_TAG=latest
+ARG FE_NAMESPACE=xchem
+ARG FE_BRANCH=master
+ARG STACK_NAMESPACE=xchem
+ARG STACK_VERSION=0.0.0
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 # We have to repeat the ARG assignments...
 # ARGs are reset during the FROM action
+# See https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 
 # Us
-ARG STACK_NAMESPACE=xchem
+ARG STACK_NAMESPACE
+ARG STACK_VERSION
 # Backend origin (a container)
-ARG BE_NAMESPACE=xchem
-ARG BE_IMAGE_TAG=latest
+ARG BE_NAMESPACE
+ARG BE_IMAGE_TAG
 # By default this is hosted on the xchem project's master branch
 # but it can be redirected with a couple of build-args.
-ARG FE_NAMESPACE=xchem
-ARG FE_BRANCH=master
+ARG FE_NAMESPACE
+ARG FE_BRANCH
 
 # Set the container ENV to record the origin of the b/e and f/e
 ENV BE_NAMESPACE ${BE_NAMESPACE}
