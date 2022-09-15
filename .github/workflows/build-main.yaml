@@ -65,6 +65,7 @@ on:
     branches:
     - 'master'
     - 'main'
+    - '703'
     tags:
     - '**'
   # Build if triggered externally.

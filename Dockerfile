@@ -7,6 +7,7 @@ FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 # Us
 ARG STACK_NAMESPACE=xchem
+ARG STACK_VERSION=0.0.0
 # Backend origin (a container)
 ARG BE_NAMESPACE=xchem
 ARG BE_IMAGE_TAG=latest
