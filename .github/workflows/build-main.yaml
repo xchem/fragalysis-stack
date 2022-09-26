@@ -114,6 +114,7 @@ jobs:
       production-tag: ${{ steps.vars.outputs.production-tag }}
       push: ${{ steps.vars.outputs.push }}
       tag: ${{ steps.vars.outputs.tag }}
+      version: ${{ steps.vars.outputs.version }}
     steps:
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -160,6 +161,13 @@ jobs:
         echo set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
         echo ::set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
 
+        # Set a version
+        STACK_VERSION="0.0.0"
+        if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then STACK_VERSION="${{ env.GITHUB_REF_SLUG }}";
+        else STACK_VERSION="${{ github.ref_name }}.${{ github.run_number }}"; fi
+        echo set-output name=STACK_VERSION::${STACK_VERSION}
+        echo ::set-output name=STACK_VERSION::${STACK_VERSION}
+
         # What image tag are we using? 'latest' (if not tagged) or a GitHub tag?
         TAG="latest"
         if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then TAG="${{ env.GITHUB_REF_SLUG }}"; fi
@@ -197,6 +205,8 @@ jobs:
         echo BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
         echo FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
         echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+        echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
+        echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
     - name: Build
       uses: docker/build-push-action@v2
       with:
@@ -206,6 +216,8 @@ jobs:
           BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
           FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
           FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+          STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
+          STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
     - name: Test
       run: >
         docker-compose -f docker-compose.test.yml up
