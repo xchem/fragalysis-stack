@@ -104,7 +104,7 @@ env:
   # - FE_BRANCH
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: 1.0.0
+  BE_IMAGE_TAG: 2.0.0
   BE_NAMESPACE: alanbchristie
   FE_BRANCH: 3.0.0
   FE_NAMESPACE: alanbchristie
