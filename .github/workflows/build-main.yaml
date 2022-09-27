@@ -10,7 +10,7 @@ name: build main
 # Every tag is deployed to staging and every production-grade tag
 # (of the form N.N.N) is deployed to production.defaults:
 #
-# Actions also run on a schedule - the the container is built, tested,
+# Actions also run on a schedule - the container is built, tested,
 # pushed and deployed (if the relevant secrets are set) based on
 # a defined schedule.
 #
@@ -26,7 +26,7 @@ name: build main
 #
 # BE_IMAGE_TAG            optional - default latest
 # BE_NAMESPACE            optional - default xchem
-# FE_BRANCH               optional - default master
+# FE_BRANCH               optional - default production
 # FE_NAMESPACE            optional - default xchem
 # STACK_NAMESPACE         optional - default xchem
 #
@@ -96,10 +96,10 @@ env:
   #   For Jobs conditional on the presence of a secret see this Gist...
   #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
   BE_IMAGE_TAG: latest
-  BE_NAMESPACE: xchem
-  FE_BRANCH: master
-  FE_NAMESPACE: xchem
-  STACK_NAMESPACE: xchem
+  BE_NAMESPACE: alanbchristie
+  FE_BRANCH: production
+  FE_NAMESPACE: alanbchristie
+  STACK_NAMESPACE: alanbchristie
   # Common slack notification variables.
   # Used in the rtCamp/action-slack-notify Action.
   SLACK_USERNAME: ActionBot
