@@ -95,9 +95,18 @@ env:
   #
   #   For Jobs conditional on the presence of a secret see this Gist...
   #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
-  BE_IMAGE_TAG: latest
+  #
+  # New production stack builds should always result in a change to one
+  # or both of the Backend or Frontend tags. i.e. before we make a production
+  # release the author needs to change one or both of: -
+  #
+  # - BE_IMAGE_TAG
+  # - FE_BRANCH
+  #
+  # Commit the changes and then tag or make a release from the stack repository.
+  BE_IMAGE_TAG: 1.0.0
   BE_NAMESPACE: alanbchristie
-  FE_BRANCH: production
+  FE_BRANCH: 1.0.0
   FE_NAMESPACE: alanbchristie
   STACK_NAMESPACE: alanbchristie
   # Common slack notification variables.
