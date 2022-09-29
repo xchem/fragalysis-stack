@@ -1,5 +1,39 @@
 # Changelog (from 22/07/2021)
 
+## 29/09/2022 - version 2022.09.0
+Job launcher release
+### Frontend ([PR #300 #302 #306-#312 #314-#320](https://github.com/xchem/fragalysis-frontend/pull/320)). 
+:heavy_plus_sign: New functionality: Job Launcher
+:heavy_plus_sign: Improved performance
+:heavy_plus_sign: Bug fixing: Layout, filters, snapshots
+
+### Backend ([PR #330 #331 #334 #336-#347](https://github.com/xchem/fragalysis-backend/pull/347)). 
+:heavy_plus_sign: New functionality: Job Launcher
+:heavy_plus_sign: Improved container building
+
+### Resolved tickets. 
+[#917](https://github.com/m2ms/fragalysis-frontend/issues/917), [#862](https://github.com/m2ms/fragalysis-frontend/issues/862), [#936](https://github.com/m2ms/fragalysis-frontend/issues/936), [#859](https://github.com/m2ms/fragalysis-frontend/issues/859), [#959](https://github.com/m2ms/fragalysis-frontend/issues/959), [#960](https://github.com/m2ms/fragalysis-frontend/issues/960), [#870](https://github.com/m2ms/fragalysis-frontend/issues/870), [#949](https://github.com/m2ms/fragalysis-frontend/issues/949), [#932](https://github.com/m2ms/fragalysis-frontend/issues/932), [#867](https://github.com/m2ms/fragalysis-frontend/issues/867), [#933](https://github.com/m2ms/fragalysis-frontend/issues/933), [#934](https://github.com/m2ms/fragalysis-frontend/issues/934), [#906](https://github.com/m2ms/fragalysis-frontend/issues/906), [#878](https://github.com/m2ms/fragalysis-frontend/issues/978), [#911](https://github.com/m2ms/fragalysis-frontend/issues/911), [#991](https://github.com/m2ms/fragalysis-frontend/issues/991), [#703](https://github.com/m2ms/fragalysis-frontend/issues/703), [#875](https://github.com/m2ms/fragalysis-frontend/issues/875), [#868](https://github.com/m2ms/fragalysis-frontend/issues/868), [#942](https://github.com/m2ms/fragalysis-frontend/issues/942), 
+ 
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+ 
+
+
+
+
+
+
+
 
 ## 20/07/2022 - version 2.7.1.
 Quick fix
@@ -18,7 +52,7 @@ Quick fix
 ### Frontend ([PR #299](https://github.com/xchem/fragalysis-frontend/pull/299)). 
 :heavy_plus_sign: Bug fixed: RHS F button crashing
 
-### Backend ([PR #325,#327,#328,#329](https://github.com/xchem/fragalysis-backend/pull/314)). 
+### Backend ([PR #325,#327,#328,#329](https://github.com/xchem/fragalysis-backend/pull/329)). 
 :heavy_plus_sign: Bug fixed: download sdf files
 :heavy_plus_sign: Crystal ids in the sdf files
 
