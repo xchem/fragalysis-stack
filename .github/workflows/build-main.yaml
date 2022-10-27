@@ -10,7 +10,7 @@ name: build main
 # Every tag is deployed to staging and every production-grade tag
 # (of the form N.N.N) is deployed to production.defaults:
 #
-# Actions also run on a schedule - the the container is built, tested,
+# Actions also run on a schedule - the container is built, tested,
 # pushed and deployed (if the relevant secrets are set) based on
 # a defined schedule.
 #
@@ -26,7 +26,7 @@ name: build main
 #
 # BE_IMAGE_TAG            optional - default latest
 # BE_NAMESPACE            optional - default xchem
-# FE_BRANCH               optional - default master
+# FE_BRANCH               optional - default production
 # FE_NAMESPACE            optional - default xchem
 # STACK_NAMESPACE         optional - default xchem
 #
@@ -95,9 +95,18 @@ env:
   #
   #   For Jobs conditional on the presence of a secret see this Gist...
   #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
+  #
+  # New production stack builds should always result in a change to one
+  # or both of the Backend or Frontend tags. i.e. before we make a production
+  # release the author needs to change one or both of: -
+  #
+  # - BE_IMAGE_TAG
+  # - FE_BRANCH
+  #
+  # Commit the changes and then tag or make a release from the stack repository.
   BE_IMAGE_TAG: latest
-  BE_NAMESPACE: xchem
   FE_BRANCH: master
+  BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
   # Common slack notification variables.
