@@ -104,11 +104,11 @@ env:
   # - FE_BRANCH
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: 2.0.0
-  FE_BRANCH: 3.0.0
-  BE_NAMESPACE: alanbchristie
-  FE_NAMESPACE: alanbchristie
-  STACK_NAMESPACE: alanbchristie
+  BE_IMAGE_TAG: latest
+  FE_BRANCH: master
+  BE_NAMESPACE: xchem
+  FE_NAMESPACE: xchem
+  STACK_NAMESPACE: xchem
   # Common slack notification variables.
   # Used in the rtCamp/action-slack-notify Action.
   SLACK_USERNAME: ActionBot
