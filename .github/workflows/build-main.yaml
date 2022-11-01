@@ -75,7 +75,7 @@ on:
         description: The fragalysis-backend namespace (to pull from)
         required: false
       be_image_tag:
-        description: The fragalysis-backend image contaienr tag (to pull from)
+        description: The fragalysis-backend image container tag (to pull from)
         required: false
       fe_namespace:
         description: The fragalysis-frontend namespace (to clone from)
@@ -104,8 +104,8 @@ env:
   # - FE_BRANCH
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: latest
-  FE_BRANCH: master
+  BE_IMAGE_TAG: stable
+  FE_BRANCH: production
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
@@ -253,9 +253,9 @@ jobs:
         SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-production:
-    # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
-    # using a pre-defined AWX Job Template name
-    # and the awx/fragalysis-production environment.
+    # A fixed job that deploys to the Fragalysis Production Kubernetes Namespace.
+    # It uses a pre-defined AWX Job Template name
+    # and the awx/fragalysis-production environment (a separate cluster).
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
@@ -284,7 +284,7 @@ jobs:
   deploy-developer:
     # A "deploy to a developer's Fragalysis" Kubernetes Namespace
     # using an environment-defined AWX Job Template name
-    # and the awx/fragalysis-developer environment.
+    # and the awx/fragalysis-developer environment (a separate cluster).
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
