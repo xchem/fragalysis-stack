@@ -24,7 +24,7 @@ name: build main
 # have the following GitHub 'Repository Secrets' defined
 # (i.e. via 'Settings -> Secrets'): -
 #
-# BE_IMAGE_TAG            optional - default latest
+# BE_IMAGE_TAG            optional - default stable
 # BE_NAMESPACE            optional - default xchem
 # FE_BRANCH               optional - default production
 # FE_NAMESPACE            optional - default xchem
@@ -216,13 +216,26 @@ jobs:
         echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
-    - name: Build
+    - name: Build (BE_IMAGE_TAG)
+      if: steps.vars.outputs.production-tag == 'false'
       uses: docker/build-push-action@v2
       with:
         tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
         build-args: |
           BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
           BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
+          FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
+          FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+          STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
+          STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
+    - name: Build (stable)
+      if: steps.vars.outputs.production-tag == 'true'
+      uses: docker/build-push-action@v2
+      with:
+        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
+        build-args: |
+          BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
+          BE_IMAGE_TAG=stable
           FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
           FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
           STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
@@ -253,9 +266,9 @@ jobs:
         SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-production:
-    # A fixed job that deploys to the Fragalysis Production Kubernetes Namespace.
-    # It uses a pre-defined AWX Job Template name
-    # and the awx/fragalysis-production environment (a separate cluster).
+    # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
+    # using a pre-defined AWX Job Template name
+    # and the awx/fragalysis-production environment.
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
@@ -284,7 +297,7 @@ jobs:
   deploy-developer:
     # A "deploy to a developer's Fragalysis" Kubernetes Namespace
     # using an environment-defined AWX Job Template name
-    # and the awx/fragalysis-developer environment (a separate cluster).
+    # and the awx/fragalysis-developer environment.
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
