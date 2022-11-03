@@ -84,7 +84,10 @@ on:
         description: The fragalysis-frontend branch (to clone from)
         required: false
       stack_namespace:
-        description: The fragalysis-stack namespace (to publish to)
+        description: The fragalysis-stack Docker Hub namespace (to publish to)
+        required: false
+      stack_image_tag:
+        description: The image tage to apply to the fragalysis-stack image
         required: false
 
 env:
@@ -179,7 +182,7 @@ jobs:
         echo set-output name=STACK_VERSION::${STACK_VERSION}
         echo ::set-output name=STACK_VERSION::${STACK_VERSION}
 
-        # What image tag are we using? 'latest' (if not tagged) or a GitHub tag?
+        # What image tag are we creating? 'latest' (if not tagged) or a GitHub tag?
         TAG="latest"
         if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then TAG="${{ env.GITHUB_REF_SLUG }}"; fi
         echo set-output name=tag::${TAG}
@@ -218,8 +221,8 @@ jobs:
         echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
-    - name: Build (BE_IMAGE_TAG)
-      if: steps.vars.outputs.production-tag == 'false'
+        echo tag=${{ steps.vars.outputs.tag }}
+    - name: Build
       uses: docker/build-push-action@v2
       with:
         tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
@@ -229,19 +232,7 @@ jobs:
           FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
           FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
           STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
-          STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
-    - name: Build (stable)
-      if: steps.vars.outputs.production-tag == 'true'
-      uses: docker/build-push-action@v2
-      with:
-        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
-        build-args: |
-          BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
-          BE_IMAGE_TAG=stable
-          FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
-          FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
-          STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
-          STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
+          STACK_VERSION=${{ steps.vars.outputs.tag }}
     - name: Test
       run: >
         docker-compose -f docker-compose.test.yml up
