@@ -258,8 +258,37 @@ jobs:
         SLACK_TITLE: Build Complete
         SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
-  deploy-production:
+  deploy-staging:
     # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
+    # using a pre-defined AWX Job Template name
+    # and the awx/fragalysis-production environment.
+    needs: build
+    if: |
+      needs.build.outputs.push == 'true' &&
+      needs.build.outputs.deploy == 'true' &&
+      needs.build.outputs.production-tag == 'false'
+    runs-on: ubuntu-latest
+    environment: awx/fragalysis-production
+    steps:
+    - name: Deploy staging
+      uses: informaticsmatters/trigger-awx-action@v1
+      with:
+        template: Staging Fragalysis Stack (Version Change)
+        template-host: ${{ secrets.AWX_HOST }}
+        template-user: ${{ secrets.AWX_USER }}
+        template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
+        template-var: stack_image_tag
+        template-var-value: ${{ needs.build.outputs.tag }}
+    - name: Notify staging deployment
+      if: steps.vars.outputs.notify == 'true'
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
+        SLACK_TITLE: Deployment Complete (Staging)
+        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+
+  deploy-production:
+    # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
     # using a pre-defined AWX Job Template name
     # and the awx/fragalysis-production environment.
     needs: build
@@ -284,8 +313,8 @@ jobs:
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployment Complete
-        SLACK_MESSAGE: Deployed to awx/fragalysis-production
+        SLACK_TITLE: Deployment Complete (Production)
+        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
 
   deploy-developer:
     # A "deploy to a developer's Fragalysis" Kubernetes Namespace
