@@ -262,11 +262,12 @@ jobs:
     # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
     # using a pre-defined AWX Job Template name
     # and the awx/fragalysis-production environment.
+    #
+    # All builds, tagged or otherwise, are deployed to staging.
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
-      needs.build.outputs.deploy == 'true' &&
-      needs.build.outputs.production-tag == 'false'
+      needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
     steps:
@@ -291,6 +292,8 @@ jobs:
     # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
     # using a pre-defined AWX Job Template name
     # and the awx/fragalysis-production environment.
+    #
+    # Only builds for production-grade tags deployed.
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
