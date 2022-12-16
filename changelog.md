@@ -1,5 +1,19 @@
 # Changelog (from 22/07/2021)
 
+
+## 16/12/2022 - version 2022.12.1
+Job launcher release
+### Frontend ([PR #335](https://github.com/xchem/fragalysis-frontend/pull/320)). 
+:heavy_plus_sign: Job table shows running jobs, and autoreloads
+:heavy_plus_sign: Improved snapshot loading
+
+### Backend ([PR #349-#361 #365 #367](https://github.com/xchem/fragalysis-backend/pull/347)). 
+:heavy_plus_sign: Bug fixing: backend timeout, error report
+
+### Resolved tickets. 
+[#977](https://github.com/m2ms/fragalysis-frontend/issues/917),[#996](https://github.com/m2ms/fragalysis-frontend/issues/996),[#979](https://github.com/m2ms/fragalysis-frontend/issues/979),[#1003](https://github.com/m2ms/fragalysis-frontend/issues/1003),[#1011](https://github.com/m2ms/fragalysis-frontend/issues/1011),[#935](https://github.com/m2ms/fragalysis-frontend/issues/935),[#995](https://github.com/m2ms/fragalysis-frontend/issues/995),
+
+
 ## 29/09/2022 - version 2022.09.0
 Job launcher release
 ### Frontend ([PR #300 #302 #306-#312 #314-#320](https://github.com/xchem/fragalysis-frontend/pull/320)). 
