@@ -46,7 +46,6 @@ RUN wget -q https://nodejs.org/download/release/v12.22.11/node-v12.22.11-linux-x
     rm node-v12.22.11-linux-x64.tar.gz
 ENV PATH /usr/local/lib/nodejs/node-v12.22.11-linux-x64/bin:$PATH
 
-ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
 ADD LICENSE /LICENSE
 ADD README.md /README.md
 RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
