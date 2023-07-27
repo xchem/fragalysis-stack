@@ -1,29 +1,25 @@
 version: '3'
 
 services:
+  # The database
   database:
     image: postgres:12.2
+    container_name: database
     volumes:
-    - ../django_data:/var/lib/postgresql/data
+    - ./data/postgresql/data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: fragalysis
       POSTGRES_DB: frag
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
     - "5432:5432"
-  cartridge:
-    image: informaticsmatters/rdkit_cartridge:Release_2017_09_1
-    user: root
-    environment:
-    - POSTGRES_PASSWORD=password
-    volumes:
-    - ../cartridge_data:/var/lib/postgresql/data
+
+  # The graph
   graph:
-    container_name: neo4j
-    image: neo4j
-    command: /bin/bash -c "sleep 1000"
+    image: neo4j:4.4.2
+    container_name: graph
     ports:
-# Comment these two out in produciton
+    # These are not used in production
     - "7474:7474"
     - "7687:7687"
     ulimits:
@@ -31,26 +27,52 @@ services:
         soft: 40000
         hard: 40000
     volumes:
-    - ../neo4j/data:/data
-    - ../neo4j/logs:/logs
+    - ./data/neo4j/data:/data
+    - ./data/neo4j/logs:/logs
     environment:
     - NEO4J_AUTH=none
     - NEO4J_dbms_memory_pagecache_size=4G
-  web:
-    image: xchem/fragalysis-stack:latest
+
+  stack:
+    image: ${STACK_NAMESPACE:-xchem}/fragalysis-stack:${STACK_TAG:-latest}
+    container_name: stack
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: /bin/bash /code/launch-stack.sh
     volumes:
-    - ../logs:/code/logs/
-    - ../media:/code/media/
+    - ./data/logs:/code/logs/
+    - ./data/media:/code/media/
+    - .:/code/
     environment:
-      POSTGRESQL_DATABASE: frag
       POSTGRESQL_USER: postgres
-      POSTGRESQL_PASSWORD: fragalysis
-      POSTGRESQL_HOST: database
-      POSTGRESQL_PORT: 5432
+      # Celery tasks need to run synchronously
+      CELERY_TASK_ALWAYS_EAGER: 'True'
+      # Error reporting and default/root log-level
+      FRAGALYSIS_BACKEND_SENTRY_DNS: ${FRAGALYSIS_BACKEND_SENTRY_DNS}
+      LOGGING_FRAMEWORK_ROOT_LEVEL: ${LOGGING_FRAMEWORK_ROOT_LEVEL:-INFO}
+      # Keycloak configuration
+      OIDC_KEYCLOAK_REALM: ${OIDC_KEYCLOAK_REALM}
+      OIDC_RP_CLIENT_ID: ${OIDC_RP_CLIENT_ID:-fragalysis-local}
+      OIDC_RP_CLIENT_SECRET: ${OIDC_RP_CLIENT_SECRET}
+      OIDC_AS_CLIENT_ID: ${OIDC_AS_CLIENT_ID:-account-server-api}
+      OIDC_DM_CLIENT_ID: ${OIDC_DM_CLIENT_ID:-data-manager-api}
+      OIDC_RENEW_ID_TOKEN_EXPIRY_MINUTES: '210'
+      # Squonk configuration
+      SQUONK2_VERIFY_CERTIFICATES: 'No'
+      SQUONK2_UNIT_BILLING_DAY: 3
+      SQUONK2_PRODUCT_FLAVOUR: BRONZE
+      SQUONK2_SLUG: fs-local
+      SQUONK2_ORG_OWNER: ${SQUONK2_ORG_OWNER}
+      SQUONK2_ORG_OWNER_PASSWORD: ${SQUONK2_ORG_OWNER_PASSWORD}
+      SQUONK2_ORG_UUID: ${SQUONK2_ORG_UUID}
+      SQUONK2_UI_URL: ${SQUONK2_UI_URL}
+      SQUONK2_DMAPI_URL: ${SQUONK2_DMAPI_URL}
+      SQUONK2_ASAPI_URL: ${SQUONK2_ASAPI_URL}
     ports:
-    - "80:80"
+    - "8080:80"
     depends_on:
-    - database
-    - graph
-    - cartridge
+      database:
+        condition: service_healthy
+      graph:
+        condition: service_healthy
