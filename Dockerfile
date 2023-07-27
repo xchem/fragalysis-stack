@@ -43,11 +43,6 @@ ENV STACK_VERSION ${STACK_VERSION}
 
 ENV APP_ROOT /code
 
-#ADD docker-entrypoint.sh ${APP_ROOT}/docker-entrypoint.sh
-#ADD LICENSE /LICENSE
-#ADD README.md /README.md
-#RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
-
 # Copy the frontend code from the frontend container
 WORKDIR ${APP_ROOT}/frontend
 WORKDIR ${APP_ROOT}/static
