@@ -26,7 +26,7 @@ name: build main
 #
 # BE_IMAGE_TAG            optional - default stable
 # BE_NAMESPACE            optional - default xchem
-# FE_BRANCH               optional - default production
+# FE_IMAGE_TAG            optional - default stable
 # FE_NAMESPACE            optional - default xchem
 # STACK_NAMESPACE         optional - default xchem
 #
@@ -80,8 +80,8 @@ on:
       fe_namespace:
         description: The fragalysis-frontend namespace (to clone from)
         required: false
-      fe_branch:
-        description: The fragalysis-frontend branch (to clone from)
+      fe_image_tag:
+        description: The fragalysis-frontend image container tag (to pull from)
         required: false
       stack_namespace:
         description: The fragalysis-stack Docker Hub namespace (to publish to)
@@ -104,11 +104,11 @@ env:
   # release the author needs to change one or both of: -
   #
   # - BE_IMAGE_TAG
-  # - FE_BRANCH
+  # - FE_IMAGE_TAG
   #
   # Commit the changes and then tag or make a release from the stack repository.
   BE_IMAGE_TAG: 2023.07.1
-  FE_BRANCH: 2023.05.1
+  FE_IMAGE_TAG: 2023.05.1
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
@@ -159,12 +159,12 @@ jobs:
         echo set-output name=FE_NAMESPACE::${FE_NAMESPACE}
         echo ::set-output name=FE_NAMESPACE::${FE_NAMESPACE}
 
-        # FE_BRANCH
-        FE_BRANCH="${{ env.FE_BRANCH }}"
-        if [ -n "${{ github.event.inputs.fe_branch }}" ]; then FE_BRANCH="${{ github.event.inputs.fe_branch }}";
-        elif [ -n "${{ secrets.FE_BRANCH }}" ]; then FE_BRANCH="${{ secrets.FE_BRANCH }}"; fi
-        echo set-output name=FE_BRANCH::${FE_BRANCH}
-        echo ::set-output name=FE_BRANCH::${FE_BRANCH}
+        # FE_IMAGE_TAG
+        FE_IMAGE_TAG="${{ env.FE_IMAGE_TAG }}"
+        if [ -n "${{ github.event.inputs.fe_image_tag }}" ]; then FE_IMAGE_TAG="${{ github.event.inputs.fe_image_tag }}";
+        elif [ -n "${{ secrets.FE_IMAGE_TAG }}" ]; then FE_IMAGE_TAG="${{ secrets.FE_IMAGE_TAG }}"; fi
+        echo set-output name=FE_IMAGE_TAG::${FE_IMAGE_TAG}
+        echo ::set-output name=FE_IMAGE_TAG::${FE_IMAGE_TAG}
 
         # STACK_NAMESPACE
         STACK_NAMESPACE="${{ env.STACK_NAMESPACE }}"
@@ -216,7 +216,7 @@ jobs:
         echo BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
         echo BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
         echo FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
-        echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+        echo FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
         echo tag=${{ steps.vars.outputs.tag }}
@@ -228,7 +228,7 @@ jobs:
           BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
           BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
           FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
-          FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+          FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
           STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
           STACK_VERSION=${{ steps.vars.outputs.tag }}
     - name: Test
