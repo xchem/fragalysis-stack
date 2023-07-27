@@ -1,12 +1,12 @@
 ARG BE_NAMESPACE=xchem
 ARG BE_IMAGE_TAG=latest
 ARG FE_NAMESPACE=xchem
-ARG FE_BRANCH=master
+ARG FE_IMAGE_TAG=master
 ARG STACK_NAMESPACE=xchem
 ARG STACK_VERSION=0.0.0
 # Start with the frontend container image.
 # We simply copy 
-FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_BRANCH} AS frontend 
+FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend 
 
 # We have to repeat the ARG assignments...
 # ARGs are reset during the FROM action
@@ -21,7 +21,7 @@ ARG BE_IMAGE_TAG
 # By default this is hosted on the xchem project's master branch
 # but it can be redirected with a couple of build-args.
 ARG FE_NAMESPACE
-ARG FE_BRANCH
+ARG FE_IMAGE_TAG
 
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
@@ -31,13 +31,13 @@ ARG STACK_VERSION
 ARG BE_NAMESPACE
 ARG BE_IMAGE_TAG
 ARG FE_NAMESPACE
-ARG FE_BRANCH
+ARG FE_IMAGE_TAG
 
 # Set the container ENV to record the origin of the b/e and f/e
 ENV BE_NAMESPACE ${BE_NAMESPACE}
 ENV BE_IMAGE_TAG ${BE_IMAGE_TAG}
 ENV FE_NAMESPACE ${FE_NAMESPACE}
-ENV FE_BRANCH ${FE_BRANCH}
+ENV FE_IMAGE_TAG ${FE_IMAGE_TAG}
 ENV STACK_NAMESPACE ${STACK_NAMESPACE}
 ENV STACK_VERSION ${STACK_VERSION}
 
