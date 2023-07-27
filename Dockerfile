@@ -4,8 +4,9 @@ ARG FE_NAMESPACE=xchem
 ARG FE_IMAGE_TAG=master
 ARG STACK_NAMESPACE=xchem
 ARG STACK_VERSION=0.0.0
-# Start with the frontend container image.
-# We simply copy 
+# Start with the frontend container image AS 'frontend'.
+# We simply copy the contents of it's '/frontend' directory
+# into the Backend image that we also pull in.
 FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend 
 
 # We have to repeat the ARG assignments...
@@ -15,14 +16,15 @@ FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend
 # Us
 ARG STACK_NAMESPACE
 ARG STACK_VERSION
-# Backend origin (a container)
+# Backend image identity
 ARG BE_NAMESPACE
 ARG BE_IMAGE_TAG
-# By default this is hosted on the xchem project's master branch
-# but it can be redirected with a couple of build-args.
+# Frontend image identity
 ARG FE_NAMESPACE
 ARG FE_IMAGE_TAG
 
+# Get the backend image
+# (we'll copy the pre-compiled forntend into it)
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 # We have to repeat the ARG assignments...
@@ -34,6 +36,7 @@ ARG FE_NAMESPACE
 ARG FE_IMAGE_TAG
 
 # Set the container ENV to record the origin of the b/e and f/e
+# (for diagnostic purposes)
 ENV BE_NAMESPACE ${BE_NAMESPACE}
 ENV BE_IMAGE_TAG ${BE_IMAGE_TAG}
 ENV FE_NAMESPACE ${FE_NAMESPACE}
