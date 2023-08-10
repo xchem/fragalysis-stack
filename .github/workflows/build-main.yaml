@@ -249,13 +249,6 @@ jobs:
     - name: Push
       if: steps.vars.outputs.push == 'true'
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
-    - name: Notify build
-      if: steps.vars.outputs.notify == 'true'
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Build Complete
-        SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
     # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
@@ -280,12 +273,15 @@ jobs:
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify staging deployment
-      if: steps.vars.outputs.notify == 'true'
+      if: needs.build.outputs.notify == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
+        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployment Complete (Staging)
+        SLACK_TITLE: STAGING Deployment Complete
         SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: actions url,commit
 
   deploy-production:
     # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
@@ -311,12 +307,15 @@ jobs:
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify production deployment
-      if: steps.vars.outputs.notify == 'true'
+      if: needs.build.outputs.notify == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
+        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployment Complete (Production)
+        SLACK_TITLE: PRODUCTION Deployment Complete
         SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: actions url,commit
 
   deploy-developer:
     # A "deploy to a developer's Fragalysis" Kubernetes Namespace
