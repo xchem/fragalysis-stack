@@ -42,7 +42,8 @@ name: build main
 #                                    'awx/fragalysis-developer'.
 #                                    You should not set this and TRIGGER_AWX.
 #
-# SLACK_NOTIFY_WEBHOOK    optional - required for Slack notifications
+# SLACK_NOTIFY_STAGING_WEBHOOK        optional - required for Slack notifications
+# SLACK_NOTIFY_PRODUCTION_WEBHOOK     optional - required for Slack notifications
 #
 # -----------
 # Environment (GitHub Environments)
@@ -135,7 +136,6 @@ jobs:
       id: vars
       env:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        SLACK_NOTIFY_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         TRIGGER_AWX: ${{ secrets.TRIGGER_AWX }}
         TRIGGER_DEVELOPER_AWX: ${{ secrets.TRIGGER_DEVELOPER_AWX }}
         SLACK_NOTIFY_STAGING_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
