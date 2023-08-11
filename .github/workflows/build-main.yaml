@@ -269,6 +269,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
     steps:
+    - name: Notify staging deployment started
+      if: needs.build.outputs.notify-staging == 'true'
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
+        SLACK_TITLE: A new STAGING deployment has started
+        SLACK_MESSAGE: Deploying image ${{ needs.build.outputs.tag }}
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
     - name: Deploy staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
@@ -278,14 +288,14 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
-    - name: Notify staging deployment
+    - name: Notify staging deployment complete
       if: needs.build.outputs.notify-staging == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
-        SLACK_TITLE: There's a new STAGING deployment
-        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+        SLACK_TITLE: A new STAGING deployment is ready
+        SLACK_MESSAGE: Deployed image ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
 
@@ -303,6 +313,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
     steps:
+    - name: Notify production deployment started
+      if: needs.build.outputs.notify-production == 'true'
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
+        SLACK_TITLE: A new PRODUCTION deployment has started
+        SLACK_MESSAGE: Deploying image ${{ needs.build.outputs.tag }}
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
@@ -312,14 +332,14 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
-    - name: Notify production deployment
+    - name: Notify production deployment complete
       if: needs.build.outputs.notify-production == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
-        SLACK_TITLE: There's a new PRODUCTION deployment
-        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+        SLACK_TITLE: A new PRODUCTION deployment is ready
+        SLACK_MESSAGE: Deployed image ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
 
