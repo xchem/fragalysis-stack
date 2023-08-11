@@ -205,9 +205,13 @@ jobs:
         echo set-output name=production-tag::${HAS_PRODUCTION_TAG}
         echo ::set-output name=production-tag::${HAS_PRODUCTION_TAG}
 
-        # Do we send Slack notifications, i.e. is SLACK_NOTIFY_WEBHOOK defined?
-        echo set-output name=notify::${{ env.SLACK_NOTIFY_WEBHOOK != '' }}
-        echo ::set-output name=notify::${{ env.SLACK_NOTIFY_WEBHOOK != '' }}
+        # Do we send Slack notifications about staging, i.e. is SLACK_NOTIFY_STAGING_WEBHOOK defined?
+        echo set-output name=notify-staging::${{ env.SLACK_NOTIFY_STAGING_WEBHOOK != '' }}
+        echo ::set-output name=notify-staging::${{ env.SLACK_NOTIFY_STAGING_WEBHOOK != '' }}
+
+        # Do we send Slack notifications about production, i.e. is SLACK_NOTIFY_PRODUCTION_WEBHOOK defined?
+        echo set-output name=notify-production::${{ env.SLACK_NOTIFY_PRODUCTION_WEBHOOK != '' }}
+        echo ::set-output name=notify-production::${{ env.SLACK_NOTIFY_PRODUCTION_WEBHOOK != '' }}
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -273,15 +277,15 @@ jobs:
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify staging deployment
-      if: needs.build.outputs.notify == 'true'
+      if: needs.build.outputs.notify-staging == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: STAGING Deployment Complete
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
+        SLACK_TITLE: There's a new STAGING deployment
         SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
-        MSG_MINIMAL: actions url,commit
+        MSG_MINIMAL: true
 
   deploy-production:
     # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
@@ -307,15 +311,15 @@ jobs:
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify production deployment
-      if: needs.build.outputs.notify == 'true'
+      if: needs.build.outputs.notify-production == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: PRODUCTION Deployment Complete
+        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
+        SLACK_TITLE: There's a new PRODUCTION deployment
         SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
-        MSG_MINIMAL: actions url,commit
+        MSG_MINIMAL: true
 
   deploy-developer:
     # A "deploy to a developer's Fragalysis" Kubernetes Namespace
