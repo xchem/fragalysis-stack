@@ -138,8 +138,6 @@ jobs:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         TRIGGER_AWX: ${{ secrets.TRIGGER_AWX }}
         TRIGGER_DEVELOPER_AWX: ${{ secrets.TRIGGER_DEVELOPER_AWX }}
-        SLACK_NOTIFY_STAGING_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
-        SLACK_NOTIFY_PRODUCTION_WEBHOOK: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
       run: |
         # BE_NAMESPACE
         BE_NAMESPACE="${{ env.BE_NAMESPACE }}"
@@ -207,14 +205,6 @@ jobs:
         echo set-output name=production-tag::${HAS_PRODUCTION_TAG}
         echo ::set-output name=production-tag::${HAS_PRODUCTION_TAG}
 
-        # Do we send Slack notifications about staging, i.e. is SLACK_NOTIFY_STAGING_WEBHOOK defined?
-        echo set-output name=notify-staging::${{ env.SLACK_NOTIFY_STAGING_WEBHOOK != '' }}
-        echo ::set-output name=notify-staging::${{ env.SLACK_NOTIFY_STAGING_WEBHOOK != '' }}
-
-        # Do we send Slack notifications about production, i.e. is SLACK_NOTIFY_PRODUCTION_WEBHOOK defined?
-        echo set-output name=notify-production::${{ env.SLACK_NOTIFY_PRODUCTION_WEBHOOK != '' }}
-        echo ::set-output name=notify-production::${{ env.SLACK_NOTIFY_PRODUCTION_WEBHOOK != '' }}
-
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -268,14 +258,16 @@ jobs:
       needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
+    env:
+      slack_notify_staging_webhook: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
     steps:
     - name: Notify staging deployment started
-      if: needs.build.outputs.notify-staging == 'true'
+      if: ${{ env.slack_notify_staging_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
-        SLACK_TITLE: A new STAGING deployment has started
+        SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
+        SLACK_TITLE: A new STAGING deployment has begun
         SLACK_MESSAGE: Deploying image ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
@@ -289,11 +281,11 @@ jobs:
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify staging deployment complete
-      if: needs.build.outputs.notify-staging == 'true'
+      if: ${{ env.slack_notify_staging_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
+        SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
         SLACK_TITLE: A new STAGING deployment is ready
         SLACK_MESSAGE: Deployed image ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
@@ -312,14 +304,16 @@ jobs:
       needs.build.outputs.production-tag == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
+    env:
+      slack_notify_production_webhook: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
     steps:
     - name: Notify production deployment started
-      if: needs.build.outputs.notify-production == 'true'
+      if: ${{ env.slack_notify_production_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
-        SLACK_TITLE: A new PRODUCTION deployment has started
+        SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
+        SLACK_TITLE: A new PRODUCTION deployment has begun
         SLACK_MESSAGE: Deploying image ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
@@ -333,11 +327,11 @@ jobs:
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify production deployment complete
-      if: needs.build.outputs.notify-production == 'true'
+      if: ${{ env.slack_notify_production_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
+        SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
         SLACK_TITLE: A new PRODUCTION deployment is ready
         SLACK_MESSAGE: Deployed image ${{ needs.build.outputs.tag }}
         SLACK_FOOTER: ''
