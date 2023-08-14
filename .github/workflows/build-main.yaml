@@ -1,20 +1,13 @@
 ---
 name: build main
 
-# Actions that take place after every commit the master/main branch.
-# Here every commit is built, tagged as 'latest' and tested.
+# Actions that take place after a workflow trigger on the master/main branch.
 # If a DOCKERHUB_USERNAME secret is defined the image is pushed.
 # If a TRIGGER_AWX secret is defined the image is deployed to Kubernetes.
 
 # Actions also run if the repository is tagged.
 # Every tag is deployed to staging and every production-grade tag
-# (of the form N.N.N) is deployed to production.defaults:
-#
-# Actions also run on a schedule - the container is built, tested,
-# pushed and deployed (if the relevant secrets are set) based on
-# a defined schedule.
-#
-# Actions also run on external trigger (workflow-dispatch).
+# (of the form N.N.N) is deployed to production.
 
 # ---------------
 # Control secrets
@@ -63,9 +56,6 @@ name: build main
 
 on:
   push:
-    branches:
-    - 'master'
-    - 'main'
     tags:
     - '**'
   # Build if triggered externally.
@@ -88,7 +78,7 @@ on:
         description: The fragalysis-stack Docker Hub namespace (to publish to)
         required: false
       stack_image_tag:
-        description: The image tage to apply to the fragalysis-stack image
+        description: The image tag to apply to the fragalysis-stack image
         required: false
 
 env:
@@ -114,18 +104,14 @@ env:
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
-  # Common slack notification variables.
-  # Used in the rtCamp/action-slack-notify Action.
-  SLACK_USERNAME: ActionBot
-  SLACK_ICON: https://github.com/InformaticsMatters/dls-fragalysis-stack-kubernetes/raw/master/icons/094-robot-face-3-512.png?size=48
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
       deploy: ${{ steps.vars.outputs.deploy }}
-      deploy-developer: ${{ steps.vars.outputs.deploy-developer }}
-      production-tag: ${{ steps.vars.outputs.production-tag }}
+      deploy_developer: ${{ steps.vars.outputs.deploy_developer }}
+      production_tag: ${{ steps.vars.outputs.production_tag }}
       push: ${{ steps.vars.outputs.push }}
       tag: ${{ steps.vars.outputs.tag }}
       version: ${{ steps.vars.outputs.version }}
@@ -143,67 +129,67 @@ jobs:
         BE_NAMESPACE="${{ env.BE_NAMESPACE }}"
         if [ -n "${{ github.event.inputs.be_namespace }}" ]; then BE_NAMESPACE="${{ github.event.inputs.be_namespace }}";
         elif [ -n "${{ secrets.BE_NAMESPACE }}" ]; then BE_NAMESPACE="${{ secrets.BE_NAMESPACE }}"; fi
-        echo set-output name=BE_NAMESPACE::${BE_NAMESPACE}
-        echo ::set-output name=BE_NAMESPACE::${BE_NAMESPACE}
+        echo BE_NAMESPACE=${BE_NAMESPACE}
+        echo "BE_NAMESPACE=${BE_NAMESPACE}" >> $GITHUB_OUTPUT
 
         # BE_IMAGE_TAG
         BE_IMAGE_TAG="${{ env.BE_IMAGE_TAG }}"
         if [ -n "${{ github.event.inputs.be_image_tag }}" ]; then BE_IMAGE_TAG="${{ github.event.inputs.be_image_tag }}";
         elif [ -n "${{ secrets.BE_IMAGE_TAG }}" ]; then BE_IMAGE_TAG="${{ secrets.BE_IMAGE_TAG }}"; fi
-        echo set-output name=BE_IMAGE_TAG::${BE_IMAGE_TAG}
-        echo ::set-output name=BE_IMAGE_TAG::${BE_IMAGE_TAG}
+        echo BE_IMAGE_TAG=${BE_IMAGE_TAG}
+        echo "BE_IMAGE_TAG=${BE_IMAGE_TAG}" >> $GITHUB_OUTPUT
 
         # FE_NAMESPACE
         FE_NAMESPACE="${{ env.FE_NAMESPACE }}"
         if [ -n "${{ github.event.inputs.fe_namespace }}" ]; then FE_NAMESPACE="${{ github.event.inputs.fe_namespace }}";
         elif [ -n "${{ secrets.FE_NAMESPACE }}" ]; then FE_NAMESPACE="${{ secrets.FE_NAMESPACE }}"; fi
-        echo set-output name=FE_NAMESPACE::${FE_NAMESPACE}
-        echo ::set-output name=FE_NAMESPACE::${FE_NAMESPACE}
+        echo FE_NAMESPACE=${FE_NAMESPACE}
+        echo "FE_NAMESPACE=${FE_NAMESPACE}" >> $GITHUB_OUTPUT
 
         # FE_BRANCH
         FE_BRANCH="${{ env.FE_BRANCH }}"
         if [ -n "${{ github.event.inputs.fe_branch }}" ]; then FE_BRANCH="${{ github.event.inputs.fe_branch }}";
         elif [ -n "${{ secrets.FE_BRANCH }}" ]; then FE_BRANCH="${{ secrets.FE_BRANCH }}"; fi
-        echo set-output name=FE_BRANCH::${FE_BRANCH}
-        echo ::set-output name=FE_BRANCH::${FE_BRANCH}
+        echo FE_BRANCH=${FE_BRANCH}
+        echo "FE_BRANCH=${FE_BRANCH}" >> $GITHUB_OUTPUT
 
         # STACK_NAMESPACE
         STACK_NAMESPACE="${{ env.STACK_NAMESPACE }}"
         if [ -n "${{ github.event.inputs.stack_namespace }}" ]; then STACK_NAMESPACE="${{ github.event.inputs.stack_namespace }}";
         elif [ -n "${{ secrets.STACK_NAMESPACE }}" ]; then STACK_NAMESPACE="${{ secrets.STACK_NAMESPACE }}"; fi
-        echo set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
-        echo ::set-output name=STACK_NAMESPACE::${STACK_NAMESPACE}
+        echo STACK_NAMESPACE=${STACK_NAMESPACE}
+        echo "STACK_NAMESPACE=${STACK_NAMESPACE}" >> $GITHUB_OUTPUT
 
         # Set a version
         STACK_VERSION="0.0.0"
         if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then STACK_VERSION="${{ env.GITHUB_REF_SLUG }}";
         else STACK_VERSION="${{ github.ref_name }}.${{ github.run_number }}"; fi
-        echo set-output name=STACK_VERSION::${STACK_VERSION}
-        echo ::set-output name=STACK_VERSION::${STACK_VERSION}
+        echo STACK_VERSION=${STACK_VERSION}
+        echo "STACK_VERSION=${STACK_VERSION}" >> $GITHUB_OUTPUT
 
         # What image tag are we creating? 'latest' (if not tagged) or a GitHub tag?
         TAG="latest"
         if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then TAG="${{ env.GITHUB_REF_SLUG }}"; fi
-        echo set-output name=tag::${TAG}
-        echo ::set-output name=tag::${TAG}
+        echo tag=${TAG}
+        echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
         # Do we push, i.e. is DOCKERHUB_USERNAME defined?
-        echo set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
-        echo ::set-output name=push::${{ env.DOCKERHUB_USERNAME != '' }}
+        echo push=${{ env.DOCKERHUB_USERNAME != '' }}
+        echo "push=${{ env.DOCKERHUB_USERNAME != '' }}" >> $GITHUB_OUTPUT
 
         # Do we deploy official images, i.e. is TRIGGER_AWX 'yes'?
-        echo set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
-        echo ::set-output name=deploy::${{ env.TRIGGER_AWX == 'yes' }}
+        echo deploy=${{ env.TRIGGER_AWX == 'yes' }}
+        echo "deploy=${{ env.TRIGGER_AWX == 'yes' }}" >> $GITHUB_OUTPUT
 
         # Do we deploy developer images, i.e. is TRIGGER_DEVELOPER_AWX 'yes'?
-        echo set-output name=deploy-developer::${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
-        echo ::set-output name=deploy-developer::${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
+        echo deploy_developer=${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
+        echo "deploy_developer=${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}" >> $GITHUB_OUTPUT
 
         # Do we deploy to production, i.e. is there a TAG of the form N.N.N?
         HAS_PRODUCTION_TAG=false
         if [[ ${{ env.GITHUB_REF_SLUG }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then HAS_PRODUCTION_TAG=true; fi
-        echo set-output name=production-tag::${HAS_PRODUCTION_TAG}
-        echo ::set-output name=production-tag::${HAS_PRODUCTION_TAG}
+        echo production_tag=${HAS_PRODUCTION_TAG}
+        echo "production_tag=${HAS_PRODUCTION_TAG}" >> $GITHUB_OUTPUT
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -216,7 +202,6 @@ jobs:
         echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
-        echo tag=${{ steps.vars.outputs.tag }}
     - name: Build
       uses: docker/build-push-action@v4
       with:
@@ -238,7 +223,7 @@ jobs:
         STACK_TAG: ${{ steps.vars.outputs.tag }}
     - name: Login to DockerHub
       if: steps.vars.outputs.push == 'true'
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -265,10 +250,9 @@ jobs:
       if: ${{ env.slack_notify_staging_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
         SLACK_TITLE: A new STAGING deployment has begun
-        SLACK_MESSAGE: Deploying image ${{ needs.build.outputs.tag }}
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}""
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Deploy staging
@@ -284,10 +268,9 @@ jobs:
       if: ${{ env.slack_notify_staging_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
         SLACK_TITLE: A new STAGING deployment is ready
-        SLACK_MESSAGE: Deployed image ${{ needs.build.outputs.tag }}
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
 
@@ -301,7 +284,7 @@ jobs:
     if: |
       needs.build.outputs.push == 'true' &&
       needs.build.outputs.deploy == 'true' &&
-      needs.build.outputs.production-tag == 'true'
+      needs.build.outputs.production_tag == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
     env:
@@ -311,10 +294,9 @@ jobs:
       if: ${{ env.slack_notify_production_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
         SLACK_TITLE: A new PRODUCTION deployment has begun
-        SLACK_MESSAGE: Deploying image ${{ needs.build.outputs.tag }}
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Deploy production
@@ -330,10 +312,9 @@ jobs:
       if: ${{ env.slack_notify_production_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_ICON: https://avatars.githubusercontent.com/u/43742164?s=32&v=4
         SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
         SLACK_TITLE: A new PRODUCTION deployment is ready
-        SLACK_MESSAGE: Deployed image ${{ needs.build.outputs.tag }}
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
 
@@ -344,7 +325,7 @@ jobs:
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
-      needs.build.outputs.deploy-developer == 'true'
+      needs.build.outputs.deploy_developer == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-developer
     steps:
