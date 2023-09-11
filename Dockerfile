@@ -5,9 +5,9 @@ ARG FE_IMAGE_TAG=master
 ARG STACK_NAMESPACE=xchem
 ARG STACK_VERSION=0.0.0
 # Start with the frontend container image AS 'frontend'.
-# We simply copy the contents of it's '/frontend' directory
-# into the Backend image that we also pull in.
-FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend 
+# As part of the build we will copy the contents of its '/frontend' directory
+# into the backend image that we also pull in.
+FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend
 
 # We have to repeat the ARG assignments...
 # ARGs are reset during the FROM action
