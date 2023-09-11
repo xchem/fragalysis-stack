@@ -87,7 +87,7 @@ on:
         description: The fragalysis-stack Docker Hub namespace (to publish to)
         required: false
       stack_image_tag:
-        description: The image tage to apply to the fragalysis-stack image
+        description: The image tag to apply to the fragalysis-stack image
         required: false
 
 env:
@@ -223,7 +223,7 @@ jobs:
     - name: Build
       uses: docker/build-push-action@v2
       with:
-        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis2-stack:${{ steps.vars.outputs.tag }}
+        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
         build-args: |
           BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
           BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
@@ -247,7 +247,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Push
       if: steps.vars.outputs.push == 'true'
-      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis2-stack:${{ steps.vars.outputs.tag }}
+      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
     - name: Notify build
       if: steps.vars.outputs.notify == 'true'
       uses: rtCamp/action-slack-notify@v2
