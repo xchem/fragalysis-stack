@@ -54,4 +54,5 @@ COPY --from=frontend /frontend ${APP_ROOT}/frontend
 RUN ln -s ${APP_ROOT}/frontend/bundles/ ${APP_ROOT}/static/bundles
 
 WORKDIR ${APP_ROOT}
+# The entrypoint is a responsibility of the backend image
 CMD ["./docker-entrypoint.sh"]
