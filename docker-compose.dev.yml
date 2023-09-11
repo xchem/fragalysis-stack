@@ -13,7 +13,7 @@ services:
     - "5432:5432"
   web:
     container_name: web_dock
-    image: xchem/fragalysis-stack:latest
+    image: xchem/fragalysis2-stack:latest
     command: /bin/bash /code/launch-stack.sh
     volumes:
     - ../logs:/code/logs/

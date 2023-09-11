@@ -34,7 +34,7 @@ services:
     - NEO4J_dbms_memory_pagecache_size=4G
 
   stack:
-    image: ${STACK_NAMESPACE:-xchem}/fragalysis-stack:${STACK_TAG:-latest}
+    image: ${STACK_NAMESPACE:-xchem}/fragalysis2-stack:${STACK_TAG:-latest}
     container_name: stack
     build:
       context: .
