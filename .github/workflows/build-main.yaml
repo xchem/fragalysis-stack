@@ -118,8 +118,6 @@ env:
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
-  # Fragalysis image tage siffix
-  IMAGE_TAG_METADATA: +2
   # Common slack notification variables.
   # Used in the rtCamp/action-slack-notify Action.
   SLACK_USERNAME: ActionBot
@@ -239,7 +237,6 @@ jobs:
           FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
           STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
           STACK_VERSION=${{ steps.vars.outputs.tag }}
-          IMAGE_TAG_METADATA=${{ env.IMAGE_TAG_METADATA }}
     - name: Test
       run: >
         docker-compose -f docker-compose.test.yml up
@@ -247,7 +244,7 @@ jobs:
         --abort-on-container-exit
       env:
         STACK_NAMESPACE: ${{ steps.vars.outputs.STACK_NAMESPACE }}
-        STACK_TAG: ${{ steps.vars.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        STACK_TAG: ${{ steps.vars.outputs.tag }}
     - name: Login to DockerHub
       if: steps.vars.outputs.push == 'true'
       uses: docker/login-action@v1
@@ -256,14 +253,14 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Push
       if: steps.vars.outputs.push == 'true'
-      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+      run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
     - name: Notify build
       if: steps.vars.outputs.notify == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         SLACK_TITLE: Build Complete
-        SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
     # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
@@ -286,14 +283,14 @@ jobs:
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
-        template-var-value: ${{ needs.build.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify staging deployment
       if: steps.vars.outputs.notify == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         SLACK_TITLE: Deployment Complete (Staging)
-        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
 
   deploy-production:
     # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
@@ -317,14 +314,14 @@ jobs:
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
-        template-var-value: ${{ needs.build.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        template-var-value: ${{ needs.build.outputs.tag }}
     - name: Notify production deployment
       if: steps.vars.outputs.notify == 'true'
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         SLACK_TITLE: Deployment Complete (Production)
-        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
 
   deploy-developer:
     # A "deploy to a developer's Fragalysis" Kubernetes Namespace
@@ -345,4 +342,4 @@ jobs:
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
-        template-var-value: ${{ needs.build.outputs.tag }}${{ env.IMAGE_TAG_METADATA }}
+        template-var-value: ${{ needs.build.outputs.tag }}
