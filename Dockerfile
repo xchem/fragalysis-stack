@@ -13,8 +13,6 @@ FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend
 # ARGs are reset during the FROM action
 # See https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 
-# Suffix
-ARG IMAGE_TAG_METADATA
 # Us
 ARG STACK_NAMESPACE
 ARG STACK_VERSION
@@ -26,7 +24,7 @@ ARG FE_NAMESPACE
 ARG FE_IMAGE_TAG
 
 # Get the backend image
-# (we'll copy the pre-compiled forntend into it)
+# (we'll copy the pre-compiled frontend into it)
 FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 
 # We have to repeat the ARG assignments...

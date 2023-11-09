@@ -30,12 +30,6 @@ name: build main
 # FE_NAMESPACE            optional - default xchem
 # STACK_NAMESPACE         optional - default xchem
 #
-# As this workflow is for the refactored model, which differs significantly from the
-# original Fragalysis, version tags have a metadata suffix applied, e.g. 2022.1.1+2.
-# Users tag as normal, but the workflow introduces (and expects) a "+2" suffix
-# in the container image tag.
-#
-# where the metadata
 # DOCKERHUB_USERNAME      optional
 # DOCKERHUB_TOKEN         optional - required if DOCKERHUB_USERNAME
 #
@@ -229,7 +223,7 @@ jobs:
     - name: Build
       uses: docker/build-push-action@v2
       with:
-        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}+2
+        tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
         build-args: |
           BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
           BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
@@ -263,8 +257,8 @@ jobs:
         SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
-    # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
-    # using a pre-defined AWX Job Template name
+    # A fixed job that deploys to the Fragalysis Staging Kubernetes Namespace
+    # using a pre-defined AWX Job Template name,
     # and the awx/fragalysis-production environment.
     #
     # All builds, tagged or otherwise, are deployed to staging.
@@ -293,8 +287,8 @@ jobs:
         SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
 
   deploy-production:
-    # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
-    # using a pre-defined AWX Job Template name
+    # A fixed job that deploys to the Fragalysis Production Kubernetes Namespace
+    # using a pre-defined AWX Job Template name,
     # and the awx/fragalysis-production environment.
     #
     # Only builds triggered by production-grade tags are deployed to production.
@@ -324,8 +318,8 @@ jobs:
         SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
 
   deploy-developer:
-    # A "deploy to a developer's Fragalysis" Kubernetes Namespace
-    # using an environment-defined AWX Job Template name
+    # Deploys to a developer's Fragalysis Kubernetes Namespace
+    # using an environment-defined AWX Job Template name,
     # and the awx/fragalysis-developer environment.
     needs: build
     if: |
