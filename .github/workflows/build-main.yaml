@@ -182,8 +182,8 @@ jobs:
         echo "deploy=${{ env.TRIGGER_AWX == 'yes' }}" >> $GITHUB_OUTPUT
 
         # Do we deploy developer images, i.e. is TRIGGER_DEVELOPER_AWX 'yes'?
-        echo deploy-developer=${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
-        echo "deploy-developer=${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}" >> $GITHUB_OUTPUT
+        echo deploy_developer=${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}
+        echo "deploy_developer=${{ env.TRIGGER_DEVELOPER_AWX == 'yes' }}" >> $GITHUB_OUTPUT
 
         # Do we deploy to production, i.e. is there a TAG of the form N.N.N?
         HAS_PRODUCTION_TAG=false
