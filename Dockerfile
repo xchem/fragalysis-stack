@@ -1,10 +1,13 @@
 ARG BE_NAMESPACE=xchem
 ARG BE_IMAGE_TAG=latest
 ARG FE_NAMESPACE=xchem
-ARG FE_BRANCH=master
+ARG FE_IMAGE_TAG=latest
 ARG STACK_NAMESPACE=xchem
 ARG STACK_VERSION=0.0.0
-FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
+# Start with the frontend container image AS 'frontend'.
+# As part of the build we will copy the contents of its '/frontend' directory
+# into the backend image that we also pull in.
+FROM ${FE_NAMESPACE}/fragalysis-frontend:${FE_IMAGE_TAG} AS frontend
 
 # We have to repeat the ARG assignments...
 # ARGs are reset during the FROM action
@@ -13,55 +16,44 @@ FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
 # Us
 ARG STACK_NAMESPACE
 ARG STACK_VERSION
-# Backend origin (a container)
+# Backend image identity
 ARG BE_NAMESPACE
 ARG BE_IMAGE_TAG
-# By default this is hosted on the xchem project's master branch
-# but it can be redirected with a couple of build-args.
+# Frontend image identity
 ARG FE_NAMESPACE
-ARG FE_BRANCH
+ARG FE_IMAGE_TAG
+
+# Get the backend image
+# (we'll copy the pre-compiled frontend into it)
+FROM ${BE_NAMESPACE}/fragalysis-backend:${BE_IMAGE_TAG}
+
+# We have to repeat the ARG assignments...
+ARG STACK_NAMESPACE
+ARG STACK_VERSION
+ARG BE_NAMESPACE
+ARG BE_IMAGE_TAG
+ARG FE_NAMESPACE
+ARG FE_IMAGE_TAG
 
 # Set the container ENV to record the origin of the b/e and f/e
+# (for diagnostic purposes)
 ENV BE_NAMESPACE ${BE_NAMESPACE}
 ENV BE_IMAGE_TAG ${BE_IMAGE_TAG}
 ENV FE_NAMESPACE ${FE_NAMESPACE}
-ENV FE_BRANCH ${FE_BRANCH}
+ENV FE_IMAGE_TAG ${FE_IMAGE_TAG}
 ENV STACK_NAMESPACE ${STACK_NAMESPACE}
 ENV STACK_VERSION ${STACK_VERSION}
 
 ENV APP_ROOT /code
 
-# Install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update -y && \
-    apt-get install -y \
-        yarn && \
-    apt-get clean
-
-# Install nodejs
-RUN wget -q https://nodejs.org/download/release/v12.22.11/node-v12.22.11-linux-x64.tar.gz && \
-    mkdir -p /usr/local/lib/nodejs && \
-    tar -xf node-v12.22.11-linux-x64.tar.gz -C /usr/local/lib/nodejs && \
-    rm node-v12.22.11-linux-x64.tar.gz
-ENV PATH /usr/local/lib/nodejs/node-v12.22.11-linux-x64/bin:$PATH
-
-ADD LICENSE /LICENSE
-ADD README.md /README.md
-RUN chmod 755 ${APP_ROOT}/docker-entrypoint.sh
-
-# Add in the frontend code
-# By default this is hosted on the xchem project's master branch
-# but it can be redirected with a couple of build-args.
-# And then continue to build it.
+# Copy the frontend code from the frontend container
+WORKDIR ${APP_ROOT}/frontend
 WORKDIR ${APP_ROOT}/static
-ARG FE_NAMESPACE=xchem
-ARG FE_BRANCH=master
-RUN git clone https://github.com/${FE_NAMESPACE}/fragalysis-frontend ${APP_ROOT}/frontend && \
-    cd ${APP_ROOT}/frontend && git checkout ${FE_BRANCH} && \
-    cd ${APP_ROOT}/frontend && yarn install && \
-    cd ${APP_ROOT}/frontend && yarn run build && \
-    ln -s ${APP_ROOT}/frontend/bundles/ ${APP_ROOT}/static/bundles
+
+COPY --from=frontend /frontend ${APP_ROOT}/frontend
+RUN ln -s ${APP_ROOT}/frontend/bundles/ ${APP_ROOT}/static/bundles
 
 WORKDIR ${APP_ROOT}
+# The entrypoint is a responsibility of the backend image
+
 CMD ["./docker-entrypoint.sh"]
