@@ -99,7 +99,7 @@ env:
   #   For Jobs conditional on the presence of a secret see this Gist...
   #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
   #
-  # New production stack builds should always result in a change to one
+  # New (tagged) production stack builds should always be preceded by a change to one
   # or both of the Backend or Frontend tags. i.e. before we make a production
   # release the author needs to change one or both of: -
   #
@@ -107,8 +107,8 @@ env:
   # - FE_IMAGE_TAG
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: 2023.07.1
-  FE_IMAGE_TAG: 2023.05.1
+  BE_IMAGE_TAG: 2023.11.2
+  FE_IMAGE_TAG: 2023.11.2
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
