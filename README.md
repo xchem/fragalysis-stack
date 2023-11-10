@@ -38,7 +38,7 @@ Check the compose file, adjust accordingly, then: -
     docker-compose up -d
 
 >   Containers in the docker-compose generally store persistent data in
-    thew `./data` and `./logs` directories of the repository. These directories
+    the `./data` directory of this repository. These directories
     are created automatically if they do not exist.
 
 When you're done you can tear everything down with: -
