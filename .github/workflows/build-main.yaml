@@ -1,20 +1,13 @@
 ---
 name: build main
 
-# Actions that take place after every commit the master/main branch.
-# Here every commit is built, tagged as 'latest' and tested.
+# Actions that take place after a workflow trigger on the master/main branch.
 # If a DOCKERHUB_USERNAME secret is defined the image is pushed.
 # If a TRIGGER_AWX secret is defined the image is deployed to Kubernetes.
 
 # Actions also run if the repository is tagged.
 # Every tag is deployed to staging and every production-grade tag
-# (of the form N.N.N) is deployed to production.defaults:
-#
-# Actions also run on a schedule - the container is built, tested,
-# pushed and deployed (if the relevant secrets are set) based on
-# a defined schedule.
-#
-# Actions also run on external trigger (workflow-dispatch).
+# (of the form N.N.N) is deployed to production.
 
 # ---------------
 # Control secrets
@@ -42,7 +35,8 @@ name: build main
 #                                    'awx/fragalysis-developer'.
 #                                    You should not set this and TRIGGER_AWX.
 #
-# SLACK_NOTIFY_WEBHOOK    optional - required for Slack notifications
+# SLACK_NOTIFY_STAGING_WEBHOOK        optional - required for Slack notifications
+# SLACK_NOTIFY_PRODUCTION_WEBHOOK     optional - required for Slack notifications
 #
 # -----------
 # Environment (GitHub Environments)
@@ -62,9 +56,6 @@ name: build main
 
 on:
   push:
-    branches:
-    - 'master'
-    - 'main'
     tags:
     - '**'
   # Build if triggered externally.
@@ -106,35 +97,31 @@ env:
   # - BE_IMAGE_TAG
   # - FE_IMAGE_TAG
   #
+  #
   # Commit the changes and then tag or make a release from the stack repository.
   BE_IMAGE_TAG: 2023.11.2
   FE_IMAGE_TAG: 2023.11.2
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
-  # Common slack notification variables.
-  # Used in the rtCamp/action-slack-notify Action.
-  SLACK_USERNAME: ActionBot
-  SLACK_ICON: https://github.com/InformaticsMatters/dls-fragalysis-stack-kubernetes/raw/master/icons/094-robot-face-3-512.png?size=48
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
       deploy: ${{ steps.vars.outputs.deploy }}
-      deploy-developer: ${{ steps.vars.outputs.deploy-developer }}
-      production-tag: ${{ steps.vars.outputs.production-tag }}
+      deploy_developer: ${{ steps.vars.outputs.deploy_developer }}
+      production_tag: ${{ steps.vars.outputs.production_tag }}
       push: ${{ steps.vars.outputs.push }}
       tag: ${{ steps.vars.outputs.tag }}
       version: ${{ steps.vars.outputs.version }}
     steps:
     - name: Inject slug/short variables
-      uses: rlespinasse/github-slug-action@v3.x
+      uses: rlespinasse/github-slug-action@v4
     - name: Initialise workflow variables
       id: vars
       env:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        SLACK_NOTIFY_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
         TRIGGER_AWX: ${{ secrets.TRIGGER_AWX }}
         TRIGGER_DEVELOPER_AWX: ${{ secrets.TRIGGER_DEVELOPER_AWX }}
       run: |
@@ -209,7 +196,7 @@ jobs:
         echo "notify=${{ env.SLACK_NOTIFY_WEBHOOK != '' }}" >> $GITHUB_OUTPUT
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Display build args
       run: |
@@ -219,9 +206,8 @@ jobs:
         echo FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
-        echo tag=${{ steps.vars.outputs.tag }}
     - name: Build
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
         tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
         build-args: |
@@ -241,20 +227,13 @@ jobs:
         STACK_TAG: ${{ steps.vars.outputs.tag }}
     - name: Login to DockerHub
       if: steps.vars.outputs.push == 'true'
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Push
       if: steps.vars.outputs.push == 'true'
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
-    - name: Notify build
-      if: steps.vars.outputs.notify == 'true'
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Build Complete
-        SLACK_MESSAGE: Built image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
     # A fixed job that deploys to the Fragalysis Staging Kubernetes Namespace
@@ -268,7 +247,18 @@ jobs:
       needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
+    env:
+      slack_notify_staging_webhook: ${{ secrets.SLACK_NOTIFY_STAGING_WEBHOOK }}
     steps:
+    - name: Notify staging deployment started
+      if: ${{ env.slack_notify_staging_webhook != '' }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
+        SLACK_TITLE: A new STAGING deployment has begun
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}""
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
     - name: Deploy staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
@@ -278,13 +268,15 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
-    - name: Notify staging deployment
-      if: steps.vars.outputs.notify == 'true'
+    - name: Notify staging deployment complete
+      if: ${{ env.slack_notify_staging_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployment Complete (Staging)
-        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+        SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
+        SLACK_TITLE: A new STAGING deployment is ready
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
 
   deploy-production:
     # A fixed job that deploys to the Fragalysis Production Kubernetes Namespace
@@ -296,10 +288,21 @@ jobs:
     if: |
       needs.build.outputs.push == 'true' &&
       needs.build.outputs.deploy == 'true' &&
-      needs.build.outputs.production-tag == 'true'
+      needs.build.outputs.production_tag == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-production
+    env:
+      slack_notify_production_webhook: ${{ secrets.SLACK_NOTIFY_PRODUCTION_WEBHOOK }}
     steps:
+    - name: Notify production deployment started
+      if: ${{ env.slack_notify_production_webhook != '' }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
+        SLACK_TITLE: A new PRODUCTION deployment has begun
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
@@ -309,13 +312,15 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
-    - name: Notify production deployment
-      if: steps.vars.outputs.notify == 'true'
+    - name: Notify production deployment complete
+      if: ${{ env.slack_notify_production_webhook != '' }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFY_WEBHOOK }}
-        SLACK_TITLE: Deployment Complete (Production)
-        SLACK_MESSAGE: Deployed ${{ needs.build.outputs.tag }}
+        SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
+        SLACK_TITLE: A new PRODUCTION deployment is ready
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
 
   deploy-developer:
     # Deploys to a developer's Fragalysis Kubernetes Namespace
@@ -324,7 +329,7 @@ jobs:
     needs: build
     if: |
       needs.build.outputs.push == 'true' &&
-      needs.build.outputs.deploy-developer == 'true'
+      needs.build.outputs.deploy_developer == 'true'
     runs-on: ubuntu-latest
     environment: awx/fragalysis-developer
     steps:
