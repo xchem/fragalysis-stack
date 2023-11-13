@@ -17,9 +17,9 @@ name: build main
 # have the following GitHub 'Repository Secrets' defined
 # (i.e. via 'Settings -> Secrets'): -
 #
-# BE_IMAGE_TAG            optional - default stable
+# BE_IMAGE_TAG            optional - default is a valid version
 # BE_NAMESPACE            optional - default xchem
-# FE_BRANCH               optional - default production
+# FE_IMAGE_TAG            optional - default is a valid version
 # FE_NAMESPACE            optional - default xchem
 # STACK_NAMESPACE         optional - default xchem
 #
@@ -71,8 +71,8 @@ on:
       fe_namespace:
         description: The fragalysis-frontend namespace (to clone from)
         required: false
-      fe_branch:
-        description: The fragalysis-frontend branch (to clone from)
+      fe_image_tag:
+        description: The fragalysis-frontend image container tag (to pull from)
         required: false
       stack_namespace:
         description: The fragalysis-stack Docker Hub namespace (to publish to)
@@ -90,17 +90,17 @@ env:
   #   For Jobs conditional on the presence of a secret see this Gist...
   #   https://gist.github.com/jonico/24ffebee6d2fa2e679389fac8aef50a3
   #
-  # New production stack builds should always result in a change to one
+  # New (tagged) production stack builds should always be preceded by a change to one
   # or both of the Backend or Frontend tags. i.e. before we make a production
   # release the author needs to change one or both of: -
   #
   # - BE_IMAGE_TAG
-  # - FE_BRANCH
+  # - FE_IMAGE_TAG
   #
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: 2023.09.1
-  FE_BRANCH: 2023.11.1
+  BE_IMAGE_TAG: 2023.11.2
+  FE_IMAGE_TAG: 2023.11.2
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
@@ -146,12 +146,12 @@ jobs:
         echo FE_NAMESPACE=${FE_NAMESPACE}
         echo "FE_NAMESPACE=${FE_NAMESPACE}" >> $GITHUB_OUTPUT
 
-        # FE_BRANCH
-        FE_BRANCH="${{ env.FE_BRANCH }}"
-        if [ -n "${{ github.event.inputs.fe_branch }}" ]; then FE_BRANCH="${{ github.event.inputs.fe_branch }}";
-        elif [ -n "${{ secrets.FE_BRANCH }}" ]; then FE_BRANCH="${{ secrets.FE_BRANCH }}"; fi
-        echo FE_BRANCH=${FE_BRANCH}
-        echo "FE_BRANCH=${FE_BRANCH}" >> $GITHUB_OUTPUT
+        # FE_IMAGE_TAG
+        FE_IMAGE_TAG="${{ env.FE_IMAGE_TAG }}"
+        if [ -n "${{ github.event.inputs.fe_image_tag }}" ]; then FE_IMAGE_TAG="${{ github.event.inputs.fe_image_tag }}";
+        elif [ -n "${{ secrets.FE_IMAGE_TAG }}" ]; then FE_IMAGE_TAG="${{ secrets.FE_IMAGE_TAG }}"; fi
+        echo FE_IMAGE_TAG=${FE_IMAGE_TAG}
+        echo "FE_IMAGE_TAG=${FE_IMAGE_TAG}" >> $GITHUB_OUTPUT
 
         # STACK_NAMESPACE
         STACK_NAMESPACE="${{ env.STACK_NAMESPACE }}"
@@ -188,8 +188,12 @@ jobs:
         # Do we deploy to production, i.e. is there a TAG of the form N.N.N?
         HAS_PRODUCTION_TAG=false
         if [[ ${{ env.GITHUB_REF_SLUG }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then HAS_PRODUCTION_TAG=true; fi
-        echo production_tag=${HAS_PRODUCTION_TAG}
-        echo "production_tag=${HAS_PRODUCTION_TAG}" >> $GITHUB_OUTPUT
+        echo production-tag=${HAS_PRODUCTION_TAG}
+        echo "production-tag=${HAS_PRODUCTION_TAG}" >> $GITHUB_OUTPUT
+
+        # Do we send Slack notifications, i.e. is SLACK_NOTIFY_WEBHOOK defined?
+        echo notify=${{ env.SLACK_NOTIFY_WEBHOOK != '' }}
+        echo "notify=${{ env.SLACK_NOTIFY_WEBHOOK != '' }}" >> $GITHUB_OUTPUT
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -199,7 +203,7 @@ jobs:
         echo BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
         echo BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
         echo FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
-        echo FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+        echo FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
     - name: Build
@@ -210,7 +214,7 @@ jobs:
           BE_NAMESPACE=${{ steps.vars.outputs.BE_NAMESPACE }}
           BE_IMAGE_TAG=${{ steps.vars.outputs.BE_IMAGE_TAG }}
           FE_NAMESPACE=${{ steps.vars.outputs.FE_NAMESPACE }}
-          FE_BRANCH=${{ steps.vars.outputs.FE_BRANCH }}
+          FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
           STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
           STACK_VERSION=${{ steps.vars.outputs.tag }}
     - name: Test
@@ -232,8 +236,8 @@ jobs:
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
   deploy-staging:
-    # A fixed job that "deploys to the Fragalysis Staging" Kubernetes Namespace
-    # using a pre-defined AWX Job Template name
+    # A fixed job that deploys to the Fragalysis Staging Kubernetes Namespace
+    # using a pre-defined AWX Job Template name,
     # and the awx/fragalysis-production environment.
     #
     # All builds, tagged or otherwise, are deployed to staging.
@@ -258,7 +262,7 @@ jobs:
     - name: Deploy staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: Staging Fragalysis Stack (Version Change)
+        template: Staging Fragalysis/2 Stack (Version Change)
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
@@ -275,8 +279,8 @@ jobs:
         MSG_MINIMAL: true
 
   deploy-production:
-    # A fixed job that "deploys to the Fragalysis Production" Kubernetes Namespace
-    # using a pre-defined AWX Job Template name
+    # A fixed job that deploys to the Fragalysis Production Kubernetes Namespace
+    # using a pre-defined AWX Job Template name,
     # and the awx/fragalysis-production environment.
     #
     # Only builds triggered by production-grade tags are deployed to production.
@@ -302,7 +306,7 @@ jobs:
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: Production Fragalysis Stack (Version Change)
+        template: Production Fragalysis/2 Stack (Version Change)
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
@@ -319,8 +323,8 @@ jobs:
         MSG_MINIMAL: true
 
   deploy-developer:
-    # A "deploy to a developer's Fragalysis" Kubernetes Namespace
-    # using an environment-defined AWX Job Template name
+    # Deploys to a developer's Fragalysis Kubernetes Namespace
+    # using an environment-defined AWX Job Template name,
     # and the awx/fragalysis-developer environment.
     needs: build
     if: |

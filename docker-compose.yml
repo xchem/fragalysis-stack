@@ -1,9 +1,10 @@
+---
 version: '3'
 
 services:
-  # The database
+
   database:
-    image: postgres:12.2
+    image: postgres:12.16-alpine3.18
     container_name: database
     volumes:
     - ./data/postgresql/data:/var/lib/postgresql/data
@@ -13,6 +14,12 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
     - "5432:5432"
+    healthcheck:
+      test: pg_isready -U postgres -d frag
+      interval: 10s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
 
   # The graph
   graph:
@@ -32,6 +39,25 @@ services:
     environment:
     - NEO4J_AUTH=none
     - NEO4J_dbms_memory_pagecache_size=4G
+    healthcheck:
+      test: wget http://localhost:7474 || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
+
+  # Redis (Celery/Worker Broker)
+  redis:
+    image: redis:7.2.3-alpine3.18
+    container_name: redis
+    ports:
+    - "6379:6379"
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
 
   stack:
     image: ${STACK_NAMESPACE:-xchem}/fragalysis-stack:${STACK_TAG:-latest}
@@ -73,6 +99,8 @@ services:
     - "8080:80"
     depends_on:
       database:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       graph:
         condition: service_healthy
