@@ -11,15 +11,17 @@ Docker setup for building a Django, RDKit and Postgres stack with neo4j.
     stack application is *assembled* using environment variables that define the
     origin of the [Backend] and [Frontend] container images.
 
-The stack is built and deployed using GitHub Actions and is deployed
+The stack is built and orchestrated using GitHub Actions and is deployed
 to *staging* and *production* installations (**Namespaces** in a designated
-Kubernetes cluster). If the build variables `DOCKERHUB_USERNAME` and
-`TRIGGER_AWX` are defined staging deployments occur on every build.
-Production deployments occur on every *production-grade* tag.
+Kubernetes cluster).
+
+The build variables `DOCKERHUB_USERNAME` and `TRIGGER_AWX` must be defined
+for orchestration to take place. Staging deployments take place on every downstream
+build (frontend and backend) and tag, and production deployments take place on every tag.
 
 You **MUST** make sure the Action variables that select the backend and frontend
 container images are updated prior to every production release so the stack
-uses the chosen backend and frontend code. You will find these variables
+uses the appropriate backend and frontend code. You will find these variables
 in the `.github/workflows/build-main.yaml` action file: -
 
 - `BE_IMAGE_TAG`
