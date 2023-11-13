@@ -262,7 +262,7 @@ jobs:
     - name: Deploy staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: Staging Fragalysis/2 Stack (Version Change)
+        template: Staging Fragalysis Stack (Version Change)
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
@@ -306,7 +306,7 @@ jobs:
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: Production Fragalysis/2 Stack (Version Change)
+        template: Production Fragalysis Stack (Version Change)
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
