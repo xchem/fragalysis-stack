@@ -99,8 +99,8 @@ env:
   #
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: 2023.11.2
-  FE_IMAGE_TAG: 2023.11.2
+  BE_IMAGE_TAG: 2024.01.1
+  FE_IMAGE_TAG: 2024.01.1
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
   STACK_NAMESPACE: xchem
@@ -254,7 +254,7 @@ jobs:
     - name: Deploy staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: Staging Fragalysis Stack (Version Change)
+        template: Staging Fragalysis Stack
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
@@ -298,7 +298,7 @@ jobs:
     - name: Deploy production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
-        template: Production Fragalysis Stack (Version Change)
+        template: Production Fragalysis Stack
         template-host: ${{ secrets.AWX_HOST }}
         template-user: ${{ secrets.AWX_USER }}
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
