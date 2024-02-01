@@ -196,7 +196,7 @@ jobs:
         echo "notify=${{ env.SLACK_NOTIFY_WEBHOOK != '' }}" >> $GITHUB_OUTPUT
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Display build args
       run: |
@@ -207,7 +207,7 @@ jobs:
         echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
         echo STACK_VERSION=${{ steps.vars.outputs.STACK_VERSION }}
     - name: Build
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         tags: ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
         build-args: |
@@ -219,7 +219,7 @@ jobs:
           STACK_VERSION=${{ steps.vars.outputs.tag }}
     - name: Login to DockerHub
       if: steps.vars.outputs.push == 'true'
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
