@@ -188,8 +188,8 @@ jobs:
         # Do we deploy to production, i.e. is there a TAG of the form N.N.N?
         HAS_PRODUCTION_TAG=false
         if [[ ${{ env.GITHUB_REF_SLUG }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then HAS_PRODUCTION_TAG=true; fi
-        echo production-tag=${HAS_PRODUCTION_TAG}
-        echo "production-tag=${HAS_PRODUCTION_TAG}" >> $GITHUB_OUTPUT
+        echo production_tag=${HAS_PRODUCTION_TAG}
+        echo "production_tag=${HAS_PRODUCTION_TAG}" >> $GITHUB_OUTPUT
 
         # Do we send Slack notifications, i.e. is SLACK_NOTIFY_WEBHOOK defined?
         echo notify=${{ env.SLACK_NOTIFY_WEBHOOK != '' }}
@@ -248,7 +248,7 @@ jobs:
       env:
         SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
         SLACK_TITLE: A new STAGING deployment has begun
-        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}""
+        SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Deploy staging
