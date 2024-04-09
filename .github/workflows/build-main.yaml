@@ -99,7 +99,7 @@ env:
   #
   #
   # Commit the changes and then tag or make a release from the stack repository.
-  BE_IMAGE_TAG: 2024.03.4
+  BE_IMAGE_TAG: 2024.04.1
   FE_IMAGE_TAG: 2024.03.7
   BE_NAMESPACE: xchem
   FE_NAMESPACE: xchem
