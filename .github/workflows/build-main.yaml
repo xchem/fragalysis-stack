@@ -252,6 +252,7 @@ jobs:
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Deploy staging
+      id: deploy_staging
       uses: informaticsmatters/trigger-awx-action@v1
       with:
         template: Staging Fragalysis Stack
@@ -260,8 +261,18 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
+      continue-on-error: true
+    - name: Notify staging deployment failure
+      if: ${{ env.slack_notify_staging_webhook != '' && steps.deploy_staging.outcome == 'failure' }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
+        SLACK_TITLE: The STAGING deployment FAILED
+        SLACK_MESSAGE: Please review the corresponding fragalysis-stack GitHuib Action Log
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
     - name: Notify staging deployment complete
-      if: ${{ env.slack_notify_staging_webhook != '' }}
+      if: ${{ env.slack_notify_staging_webhook != '' && steps.deploy_staging.outcome == 'success' }}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
@@ -296,6 +307,7 @@ jobs:
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Deploy production
+      id: deploy_production
       uses: informaticsmatters/trigger-awx-action@v1
       with:
         template: Production Fragalysis Stack
@@ -304,8 +316,18 @@ jobs:
         template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
         template-var: stack_image_tag
         template-var-value: ${{ needs.build.outputs.tag }}
+      continue-on-error: true
+    - name: Notify production deployment failure
+      if: ${{ env.slack_notify_production_webhook != '' && steps.deploy_production.outcome == 'failure' }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
+        SLACK_TITLE: The PRODUCTION deployment FAILED
+        SLACK_MESSAGE: Please review the corresponding fragalysis-stack GitHuib Action Log
+        SLACK_FOOTER: ''
+        MSG_MINIMAL: true
     - name: Notify production deployment complete
-      if: ${{ env.slack_notify_production_webhook != '' }}
+      if: ${{ env.slack_notify_production_webhook != '' && steps.deploy_production.outcome == 'success'}}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
