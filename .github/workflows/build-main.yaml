@@ -253,7 +253,7 @@ jobs:
         MSG_MINIMAL: true
     - name: Deploy staging
       id: deploy_staging
-      uses: informaticsmatters/trigger-awx-action@v1
+      uses: informaticsmatters/trigger-awx-action@v2
       with:
         template: Staging Fragalysis Stack
         template-host: ${{ secrets.AWX_HOST }}
@@ -308,7 +308,7 @@ jobs:
         MSG_MINIMAL: true
     - name: Deploy production
       id: deploy_production
-      uses: informaticsmatters/trigger-awx-action@v1
+      uses: informaticsmatters/trigger-awx-action@v2
       with:
         template: Production Fragalysis Stack
         template-host: ${{ secrets.AWX_HOST }}
@@ -348,7 +348,7 @@ jobs:
     environment: awx/fragalysis-developer
     steps:
     - name: Deploy developer
-      uses: informaticsmatters/trigger-awx-action@v1
+      uses: informaticsmatters/trigger-awx-action@v2
       with:
         template: ${{ secrets.AWX_TEMPLATE_NAME }}
         template-host: ${{ secrets.AWX_HOST }}
