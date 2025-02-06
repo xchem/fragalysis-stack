@@ -227,6 +227,25 @@ jobs:
       if: steps.vars.outputs.push == 'true'
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
+  trigger-behaviour-tests:
+    # Trigger behaviour tests
+    # (if deploying, but not to production)
+    needs: build
+    if: |
+      needs.build.outputs.push == 'true' &&
+      needs.build.outputs.deploy == 'true' &&
+      needs.build.outputs.production_tag == 'false'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Trigger behaviour tests
+      uses: informaticsmatters/trigger-ci-action@v1
+      with:
+        ci-owner: xchem
+        ci-repository: fragalysis-stack-behaviour-tests
+        ci-name: latest stack test
+        ci-user: ${{ secrets.STACK_USER }}
+        ci-user-token: ${{ secrets.STACK_USER_TOKEN }}
+
   deploy-staging:
     # A fixed job that deploys to the Fragalysis Staging Kubernetes Namespace
     # using a pre-defined AWX Job Template name,
@@ -280,20 +299,6 @@ jobs:
         SLACK_MESSAGE: Image tag is "${{ needs.build.outputs.tag }}"
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
-
-  trigger-behaviour-tests:
-    needs: build
-    if: needs.build.outputs.push == 'true'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Trigger behaviour tests
-      uses: informaticsmatters/trigger-ci-action@v1
-      with:
-        ci-owner: xchem
-        ci-repository: fragalysis-stack-behaviour-tests
-        ci-name: latest stack test
-        ci-user: ${{ secrets.STACK_USER }}
-        ci-user-token: ${{ secrets.STACK_USER_TOKEN }}
 
   deploy-production:
     # A fixed job that deploys to the Fragalysis Production Kubernetes Namespace
