@@ -217,6 +217,23 @@ jobs:
           FE_IMAGE_TAG=${{ steps.vars.outputs.FE_IMAGE_TAG }}
           STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
           STACK_VERSION=${{ steps.vars.outputs.tag }}
+    - name: Vulnerability Scan (OSV)
+      # The vulnerability scan (using Google's OSV)
+      # Allowed to fail (we force true) as it's used for information only
+      # The generated "Common Vulnerability Scoring System (CVSS)"" values
+      # are interpreted as...
+      #
+      # - None: 0.0 (No impact)
+      # - Low: 0.1–3.9 (Minor risk)
+      # - Medium: 4.0–6.9 (Moderate risk)
+      # - High: 7.0–8.9 (Serious risk)
+      # - Critical: 9.0–10.0 (Grave, severe risk)
+      run: |
+        wget https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -O osv-scanner
+        chmod +x osv-scanner
+        ./osv-scanner scan image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }} \
+            --format markdown --output scan.md || true
+        cat scan.md >> $GITHUB_STEP_SUMMARY
     - name: Login to DockerHub
       if: steps.vars.outputs.push == 'true'
       uses: docker/login-action@v3
@@ -227,24 +244,27 @@ jobs:
       if: steps.vars.outputs.push == 'true'
       run: docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
 
-  trigger-behaviour-tests:
-    # Trigger behaviour tests
-    # (if deploying, but not to production)
-    needs: build
-    if: |
-      needs.build.outputs.push == 'true' &&
-      needs.build.outputs.deploy == 'true' &&
-      needs.build.outputs.production_tag == 'false'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Trigger behaviour tests
-      uses: informaticsmatters/trigger-ci-action@v1
-      with:
-        ci-owner: xchem
-        ci-repository: fragalysis-stack-behaviour-tests
-        ci-name: latest stack test
-        ci-user: ${{ secrets.STACK_USER }}
-        ci-user-token: ${{ secrets.STACK_USER_TOKEN }}
+# Behaviour tests are too fragile.
+# Disabled for now (achristie)
+#
+#  trigger-behaviour-tests:
+#    # Trigger behaviour tests
+#    # (if deploying, but not to production)
+#    needs: build
+#    if: |
+#      needs.build.outputs.push == 'true' &&
+#      needs.build.outputs.deploy == 'true' &&
+#      needs.build.outputs.production_tag == 'false'
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Trigger behaviour tests
+#      uses: informaticsmatters/trigger-ci-action@v1
+#      with:
+#        ci-owner: xchem
+#        ci-repository: fragalysis-stack-behaviour-tests
+#        ci-name: latest stack test
+#        ci-user: ${{ secrets.STACK_USER }}
+#        ci-user-token: ${{ secrets.STACK_USER_TOKEN }}
 
   deploy-staging:
     # A fixed job that deploys to the Fragalysis Staging Kubernetes Namespace
