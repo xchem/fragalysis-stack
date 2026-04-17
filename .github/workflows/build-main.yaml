@@ -307,7 +307,7 @@ jobs:
       env:
         SLACK_WEBHOOK: ${{ env.slack_notify_staging_webhook }}
         SLACK_TITLE: The STAGING deployment FAILED
-        SLACK_MESSAGE: Please review the corresponding fragalysis-stack GitHuib Action Log
+        SLACK_MESSAGE: Please review the corresponding fragalysis-stack GitHub Action Log
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Notify staging deployment complete
@@ -362,7 +362,7 @@ jobs:
       env:
         SLACK_WEBHOOK: ${{ env.slack_notify_production_webhook }}
         SLACK_TITLE: The PRODUCTION deployment FAILED
-        SLACK_MESSAGE: Please review the corresponding fragalysis-stack GitHuib Action Log
+        SLACK_MESSAGE: Please review the corresponding fragalysis-stack GitHub Action Log
         SLACK_FOOTER: ''
         MSG_MINIMAL: true
     - name: Notify production deployment complete
