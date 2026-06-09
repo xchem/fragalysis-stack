@@ -1,6 +1,6 @@
 ---
 name: release
-description: Run the fragalysis-stack release process. Finds the most recent open GitHub ticket whose title begins with "release" (case-insensitive), reads the fragalysis-backend and fragalysis-frontend versions from its body, updates the image tags in the build workflow, commits to master, and tags a stack release. Use when the user asks to "do a release", "cut a release", "run the release process", or invokes /release.
+description: Run the fragalysis-stack release process. Asks the user which GitHub ticket represents the release, reads the fragalysis-backend and fragalysis-frontend versions from its body, updates the image tags in the build workflow, commits to master, and tags a stack release. Use when the user asks to "do a release", "cut a release", "run the release process", or invokes /release.
 ---
 
 # Fragalysis stack release
@@ -15,19 +15,10 @@ each on its own bullet point in a flexible format, e.g. `- backend 2026.06.1` an
 This process tags and (via CI/AWX) deploys to **staging** and, for `N.N.N` tags, **production**. It is
 outward-facing and hard to reverse, so **confirm with the user before committing, pushing, or tagging.**
 
-## Step 1 — Find the release ticket
+## Step 1 — Identify the release ticket
 
-Find the most recent **open** issue in `xchem/fragalysis-stack` whose title begins with "release"
-(case-insensitive). Fetch candidates and pick the newest by `createdAt`:
-
-```bash
-gh issue list --repo xchem/fragalysis-stack --state open \
-  --json number,title,body,createdAt --limit 100
-```
-
-Filter to titles matching `^\s*release\b` (case-insensitive) and choose the one with the latest
-`createdAt`. If none is found, **stop** and tell the user no release ticket exists — do not invent
-versions. If you find more than one, report them and confirm which to use.
+Ask the user which ticket represents the release — do not search for it. Have them give you the issue
+number (in `xchem/fragalysis-stack`). Do not proceed until they have told you which ticket to use.
 
 ## Step 2 — Extract the backend and frontend versions
 
@@ -122,8 +113,21 @@ gh release create <stack tag> --repo xchem/fragalysis-stack \
 
 - Link the triggered workflow run (`gh run list --repo xchem/fragalysis-stack --limit 3`) so the user
   can watch the ~10–20 min build/deploy.
-- Ask whether to comment on and/or close the release ticket (#<NUMBER>) referencing the new tag. Only do
-  so if the user agrees.
+- Record the release on the ticket the user started from (Step 1). Comment on that issue with a clear,
+  single line identifying the stack release just made, so anyone reading the ticket can see exactly which
+  release it produced, e.g.:
+
+  ```bash
+  gh issue comment <NUMBER> --repo xchem/fragalysis-stack \
+    --body "Stack release **<stack tag>** created (backend <backend version>, frontend <frontend version>)."
+  ```
+
+- Do not close the release ticket — tickets on the project board are not closed here.
+- Finally, add the `fragalysis-stack` label to that issue to mark it as released:
+
+  ```bash
+  gh issue edit <NUMBER> --repo xchem/fragalysis-stack --add-label fragalysis-stack
+  ```
 
 ## Guardrails
 
