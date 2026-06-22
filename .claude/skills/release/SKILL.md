@@ -9,8 +9,11 @@ This repo contains no application code — a release means pointing the stack bu
 **fragalysis-backend** and **fragalysis-frontend** image tags, committing that change, then tagging
 this repo so GitHub Actions builds and deploys the stack. Background: see `CLAUDE.md` ("Releasing").
 
-A release ticket drives the process. The ticket body names the backend and frontend versions to use,
-each on its own bullet point in a flexible format, e.g. `- backend 2026.06.1` and `- frontend 2026.05.7`.
+A release ticket drives the process. The ticket is a GitHub issue in **`m2ms/fragalysis-frontend`**,
+tracked on the m2ms project board <https://github.com/orgs/m2ms/projects/2>. The number the user gives
+is that issue's number in `m2ms/fragalysis-frontend` (it is **not** an `xchem/fragalysis-stack` issue).
+The ticket body names the backend and frontend versions to use, each on its own line in a flexible
+format, e.g. `## Backend 2026.06.1` and `## Frontend 2026.06.2`.
 
 This process tags and (via CI/AWX) deploys to **staging** and, for `N.N.N` tags, **production**. It is
 outward-facing and hard to reverse, so **confirm with the user before committing, pushing, or tagging.**
@@ -18,7 +21,8 @@ outward-facing and hard to reverse, so **confirm with the user before committing
 ## Step 1 — Identify the release ticket
 
 Ask the user which ticket represents the release — do not search for it. Have them give you the issue
-number (in `xchem/fragalysis-stack`). Do not proceed until they have told you which ticket to use.
+number (an issue in `m2ms/fragalysis-frontend`, tracked on the m2ms project board
+<https://github.com/orgs/m2ms/projects/2>). Do not proceed until they have told you which ticket to use.
 
 ## Step 2 — Extract the backend and frontend versions
 
@@ -29,7 +33,7 @@ dotted-number token like `2026.06.1`. This Python snippet captures the first ver
 after each keyword:
 
 ```bash
-gh issue view <NUMBER> --repo xchem/fragalysis-stack --json body -q .body | python3 -c '
+gh issue view <NUMBER> --repo m2ms/fragalysis-frontend --json body -q .body | python3 -c '
 import re, sys
 body = sys.stdin.read()
 def find(keyword):
@@ -118,7 +122,7 @@ gh release create <stack tag> --repo xchem/fragalysis-stack \
   release it produced, e.g.:
 
   ```bash
-  gh issue comment <NUMBER> --repo xchem/fragalysis-stack \
+  gh issue comment <NUMBER> --repo m2ms/fragalysis-frontend \
     --body "Stack release **<stack tag>** created (backend <backend version>, frontend <frontend version>)."
   ```
 
@@ -126,7 +130,7 @@ gh release create <stack tag> --repo xchem/fragalysis-stack \
 - Finally, add the `fragalysis-stack` label to that issue to mark it as released:
 
   ```bash
-  gh issue edit <NUMBER> --repo xchem/fragalysis-stack --add-label fragalysis-stack
+  gh issue edit <NUMBER> --repo m2ms/fragalysis-frontend --add-label fragalysis-stack
   ```
 
 ## Guardrails
