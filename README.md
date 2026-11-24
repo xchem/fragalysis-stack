@@ -104,7 +104,7 @@ A second build on the same day replaces the image for that date.
 
 ### Configuration
 
-The workflow needs these repository secrets: -
+The workflow needs these repository (or organisation) secrets: -
 
 - `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`, to push the images
 - `TRIGGER_SECURITY_AWX`, set to `yes`, to deploy the images
@@ -124,7 +124,36 @@ When users approve the security build, release the patches to production: -
    [Pushing a release to production](#pushing-a-release-to-production).
    Change only the image tags of the repositories that you released.
 
-Steps 1 and 2 also merge the patches back into `staging` and update `security`.
+Steps 1 and 2 also merge the patches back into `staging` and update `security`
+(see [Limitations](#limitations)).
+
+### Limitations
+
+**The schedule times are not guaranteed.**
+GitHub can start a scheduled workflow some hours late.
+Thus the backend and frontend builds (05:30 UTC) can start after the stack build (07:30 UTC).
+The stack then uses the `security` images of the previous day.
+
+**A merge to `security` does not start a build.**
+The auto-merge uses the `GITHUB_TOKEN`, and its pushes do not start workflows.
+A merged patch gets into a `security` image at the next daily build.
+Thus a patch can take one or two days to get to the security stack.
+
+**Some alerts never get a pull request to `security`.**
+GitHub always sends a Dependabot *security* update to `staging`, the default branch.
+Only a Dependabot *version* update goes to `security`.
+A version update usually changes only a direct dependency.
+Thus an alert for an indirect (transitive) dependency does not get a fix on `security`.
+You must copy that fix from `staging` to `security` manually.
+
+**The auto-merge cannot merge changes to workflow files.**
+The `GITHUB_TOKEN` cannot change files in `.github/workflows/`.
+If a GitHub Actions update fixes an alert, you must merge it manually.
+
+**Steps 1 and 2 of the release are partly manual.**
+After a production release, a person must open the back-merge pull request
+and update `security` (see fragalysis-backend issue #1098).
+The `release-security` skill does these steps for a security release.
 
 ---
 
