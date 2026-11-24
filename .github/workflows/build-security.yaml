@@ -1,0 +1,153 @@
+---
+name: build security
+
+# Issue #139.
+#
+# Builds a "security" stack image each day from the 'security' images
+# of the backend and frontend. The 'security' branch in each of those
+# repositories is a patch branch of 'production' that collects Dependabot updates.
+#
+# The image is tagged 'security-YYYYMMDD' (the UTC date of the build)
+# and 'security'. The dated tag is deployed, via AWX, to the developer cluster
+# so that users can test it before the patches are released to production.
+#
+# GitHub runs 'schedule' triggers only from the default branch ('master').
+# The schedule runs after the daily backend build (05:30 UTC).
+#
+# This workflow never deploys to staging or production.
+# See the "Security builds" section of README.md.
+
+# ---------------
+# Control secrets
+# ---------------
+#
+# DOCKERHUB_USERNAME      optional - if set, the images are pushed
+# DOCKERHUB_TOKEN         optional - required if DOCKERHUB_USERNAME
+# STACK_NAMESPACE         optional - default xchem
+#
+# TRIGGER_SECURITY_AWX    optional - set to 'yes' to deploy the security image via AWX.
+#                                    You also need the repository environment
+#                                    'awx/fragalysis-security'.
+#
+# -----------
+# Environment (GitHub Environments)
+# -----------
+#
+# Environment             awx/fragalysis-security
+#
+# AWX_HOST                The fully-qualified URL to the developer AWX server.
+# AWX_USER                The username of someone that can execute the AWX Job.
+# AWX_USER_PASSWORD       The user's password.
+
+on:
+  schedule:
+  # Every day at 07:30 (UTC)
+  - cron: '30 7 * * *'
+  workflow_dispatch:
+
+env:
+  BE_IMAGE_TAG: security
+  FE_IMAGE_TAG: security
+  BE_NAMESPACE: xchem
+  FE_NAMESPACE: xchem
+  STACK_NAMESPACE: xchem
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.vars.outputs.deploy }}
+      push: ${{ steps.vars.outputs.push }}
+      tag: ${{ steps.vars.outputs.tag }}
+    steps:
+    - name: Initialise workflow variables
+      id: vars
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        TRIGGER_SECURITY_AWX: ${{ secrets.TRIGGER_SECURITY_AWX }}
+      run: |
+        # STACK_NAMESPACE
+        STACK_NAMESPACE="${{ env.STACK_NAMESPACE }}"
+        if [ -n "${{ secrets.STACK_NAMESPACE }}" ]; then STACK_NAMESPACE="${{ secrets.STACK_NAMESPACE }}"; fi
+        echo STACK_NAMESPACE=${STACK_NAMESPACE}
+        echo "STACK_NAMESPACE=${STACK_NAMESPACE}" >> "$GITHUB_OUTPUT"
+
+        # The image tag is 'security-' and the UTC date of the build
+        DATE=$(date -u +%Y%m%d)
+        echo "tag=security-${DATE}"
+        echo "tag=security-${DATE}" >> "$GITHUB_OUTPUT"
+
+        # Do we push, i.e. is DOCKERHUB_USERNAME defined?
+        echo push=${{ env.DOCKERHUB_USERNAME != '' }}
+        echo "push=${{ env.DOCKERHUB_USERNAME != '' }}" >> "$GITHUB_OUTPUT"
+
+        # Do we deploy, i.e. is TRIGGER_SECURITY_AWX 'yes'?
+        echo deploy=${{ env.TRIGGER_SECURITY_AWX == 'yes' }}
+        echo "deploy=${{ env.TRIGGER_SECURITY_AWX == 'yes' }}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Display build args
+      run: |
+        echo BE_NAMESPACE=${{ env.BE_NAMESPACE }}
+        echo BE_IMAGE_TAG=${{ env.BE_IMAGE_TAG }}
+        echo FE_NAMESPACE=${{ env.FE_NAMESPACE }}
+        echo FE_IMAGE_TAG=${{ env.FE_IMAGE_TAG }}
+        echo STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
+        echo STACK_VERSION=${{ steps.vars.outputs.tag }}
+    - name: Build
+      uses: docker/build-push-action@v5
+      with:
+        # Always pull, so that we use the latest 'security' images
+        pull: true
+        tags: |
+          ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
+          ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:security
+        build-args: |
+          BE_NAMESPACE=${{ env.BE_NAMESPACE }}
+          BE_IMAGE_TAG=${{ env.BE_IMAGE_TAG }}
+          FE_NAMESPACE=${{ env.FE_NAMESPACE }}
+          FE_IMAGE_TAG=${{ env.FE_IMAGE_TAG }}
+          STACK_NAMESPACE=${{ steps.vars.outputs.STACK_NAMESPACE }}
+          STACK_VERSION=${{ steps.vars.outputs.tag }}
+    - name: Vulnerability Scan (OSV)
+      # For information only (allowed to fail).
+      # See build-main.yaml for an interpretation of the CVSS values.
+      run: |
+        wget https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -O osv-scanner
+        chmod +x osv-scanner
+        ./osv-scanner scan image ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }} \
+            --format markdown --output scan.md || true
+        cat scan.md >> "$GITHUB_STEP_SUMMARY"
+    - name: Login to DockerHub
+      if: steps.vars.outputs.push == 'true'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Push
+      if: steps.vars.outputs.push == 'true'
+      run: |
+        docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:${{ steps.vars.outputs.tag }}
+        docker push ${{ steps.vars.outputs.STACK_NAMESPACE }}/fragalysis-stack:security
+
+  deploy-security:
+    # Deploys the dated security image to the security Kubernetes Namespace
+    # on the developer cluster, using the developer AWX server.
+    needs: build
+    if: |
+      needs.build.outputs.push == 'true' &&
+      needs.build.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    environment: awx/fragalysis-security
+    steps:
+    - name: Deploy security
+      uses: informaticsmatters/trigger-awx-action@v3
+      with:
+        template: Security Fragalysis Stack
+        template-host: ${{ secrets.AWX_HOST }}
+        template-user: ${{ secrets.AWX_USER }}
+        template-user-password: ${{ secrets.AWX_USER_PASSWORD }}
+        template-var: stack_image_tag
+        template-var-value: ${{ needs.build.outputs.tag }}

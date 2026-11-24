@@ -12,8 +12,14 @@ backend image and copies the frontend's `/frontend` directory into the backend a
 The container entrypoint and runtime behaviour (`docker-entrypoint.sh`, `launch-stack.sh`)
 belong to the **backend** image, not this repo.
 
-Because there is no source to lint or unit-test here, day-to-day work is: changing image tags,
-adjusting Docker/compose configuration, and editing the GitHub Actions workflow.
+Because there is no application source here, day-to-day work is: changing image tags,
+adjusting Docker/compose configuration, and editing the GitHub Actions workflows.
+`tests/` holds structural tests for the workflow files (`python3 -m unittest discover -s tests`,
+needs PyYAML); the `test` workflow runs them on every pull request.
+
+`build-security.yaml` is a separate daily build of the backend/frontend `:security` images,
+deployed only to the developer cluster (see "Security builds" in `README.md`). Do not merge it
+into `build-main.yaml`.
 
 ## Key build args / image selection
 
